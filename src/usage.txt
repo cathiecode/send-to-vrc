@@ -1,0 +1,16 @@
+Send to VRC {version}
+
+Usage:
+    send-to-vrc <FILE>
+    send-to-vrc <command>
+    send-to-vrc [-h|--help|--version|--verbose|--debug|--trace]
+
+Subcommands:
+    config:
+        Open config menu
+    notice:
+        Print thirdparty notice
+    help:
+        Print help
+    version:
+        Print version
