@@ -1,6 +1,6 @@
 # Send to VRC
 Upload VRChat Prints from File Explorer seamlessly
-![Demo](https://github.com/user-attachments/assets/c6d94db2-4b71-45bc-a646-dd90ffd7f27a)
+[![Demo](https://github.com/user-attachments/assets/f555b6e7-b29e-483b-8ebf-0b309a14654b)](https://github.com/user-attachments/assets/c6d94db2-4b71-45bc-a646-dd90ffd7f27a)
 
 ## Warning
 This application is not ready to be used by end users.
