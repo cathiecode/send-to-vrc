@@ -3,7 +3,7 @@ Send to VRC {version}
 Usage:
     send-to-vrc <FILE>
     send-to-vrc <command>
-    send-to-vrc [-h|--help|--version|--verbose|--debug|--trace]
+    send-to-vrc [-h|--help|--version|--verbose|--debug|--trace|--nogui]
 
 Subcommands:
     config:

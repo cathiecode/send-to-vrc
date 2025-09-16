@@ -20,7 +20,7 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             version: Some(1),
-            vrchat_api_key: None,
+            vrchat_api_key: None
         }
     }
 }

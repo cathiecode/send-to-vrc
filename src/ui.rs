@@ -6,7 +6,7 @@ mod font;
 
 use crate::{
     config::{self, Config},
-    logic::send_image_file_to_print,
+    logic::{login_vrchat, send_image_file_to_print, TwoFactorAuthenticationCode},
 };
 
 pub enum GuiState {
@@ -14,6 +14,9 @@ pub enum GuiState {
     Uploading(AsyncTask<(), Error>),
     Uploaded,
     Config(crate::config::Config, bool),
+    Login {
+        user_name: String, password: String, task: AsyncTask<String, Error>
+    },
     Error(String),
 }
 
@@ -51,6 +54,10 @@ impl Gui {
         self.state.config(self.config.clone());
     }
 
+    pub fn login(&mut self) {
+        self.state.login();
+    }
+
     pub fn error(&mut self, msg: String) {
         self.state = GuiState::Error(msg);
     }
@@ -62,6 +69,7 @@ impl eframe::App for Gui {
             GuiState::Init => {}
             GuiState::Uploading(_) => self.state.update_uploading(ctx, ui),
             GuiState::Uploaded => self.state.update_uploaded(ui),
+            GuiState::Login{..} => self.state.update_login(ui),
             GuiState::Error(_) => self.state.update_error(ui),
             GuiState::Config(_, _) => self.update_config(ui),
         });
@@ -137,6 +145,44 @@ impl GuiState {
         ui.label(msg.as_str());
     }
 
+    fn update_login(&mut self, ui: &mut egui::Ui) {
+        let GuiState::Login{user_name, password, task} = self else {
+            return;
+        };
+
+        ui.heading("Login");
+
+        ui.label("Username:");
+        if ui.text_edit_singleline(user_name).changed() {
+            // do nothing
+        }
+
+        ui.label("Password:");
+        if ui.text_edit_singleline(password).changed() {
+            // do nothing
+        }
+
+        if ui.button("Login").clicked() {
+            let username = user_name.clone();
+            let password = password.clone();
+
+            *task = AsyncTask::new(move || {
+                login_vrchat(&username, &password, TwoFactorAuthenticationCode::None)
+            });
+        }
+
+        match task.seek() {
+            Some(Ok(_)) => {
+                *self = GuiState::Init;
+                // TODO: write token to config
+            }
+            Some(Err(e)) => {
+                *self = GuiState::Error(format!("{}", e));
+            }
+            None => {}
+        }
+    }
+
     pub fn upload(&mut self, path: &std::path::Path, vrchat_api_key: String) {
         let GuiState::Init = self else {
             return;
@@ -152,6 +198,18 @@ impl GuiState {
 
     pub fn config(&mut self, config: crate::config::Config) {
         *self = GuiState::Config(config, false);
+    }
+
+    pub fn login(&mut self) {
+        let GuiState::Init = self else {
+            return;
+        };
+
+        *self = GuiState::Login {
+            user_name: "".to_string(),
+            password: "".to_string(),
+            task: AsyncTask::new(|| Err(anyhow::anyhow!("Not started"))),
+        };
     }
 }
 
