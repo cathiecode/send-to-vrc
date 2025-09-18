@@ -17,6 +17,7 @@ export default function ButtonCard(props: ButtonCardProps) {
   return (
     <CardButtonVariant
       css={css`
+        font-size: inherit;
         transition: background-color 0.18s;
 
         &:hover,
