@@ -131,6 +131,7 @@ export default function ImageFilePickerComponent(
               opacity: 0;
               transition: opacity 0.2s;
               color: #fff;
+              border: none;
 
               :hover {
                 opacity: 1;
