@@ -13,13 +13,13 @@ const Card = styled.div`
 `;
 
 const CardIcon = styled.div`
-            position: absolute;
-          left: 1em;
-          top: 50%;
-          transform: translateY(-50%);
-          & > * {
-            font-size: 2em;
-          }
+  position: absolute;
+  left: 1em;
+  top: 50%;
+  transform: translateY(-50%);
+  & > * {
+    font-size: 2em;
+  }
 `;
 
 const CardTitle = styled.div`
