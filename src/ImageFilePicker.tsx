@@ -7,7 +7,7 @@ type ImageFilePickerProps = {
   pickedFilePath?: string;
   pickedFileValidity: "pending" | "valid" | "invalid";
   height: string;
-  maxWidth?: string
+  maxWidth?: string;
   readonly?: boolean;
   onFilePicked?: (path: string | undefined) => void;
 };
@@ -33,9 +33,6 @@ export default function ImageFilePicker(props: ImageFilePickerProps) {
   }, [onFilePicked]);
 
   return (
-    <ImageFilePickerComponent
-      onOpenClicked={onOpenClicked}
-      {...baseProps}
-    />
+    <ImageFilePickerComponent onOpenClicked={onOpenClicked} {...baseProps} />
   );
 }

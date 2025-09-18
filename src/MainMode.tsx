@@ -14,9 +14,7 @@ export default function MainMode() {
   return (
     <div>
       <h1>Main</h1>
-      <FilePickerButton
-        onFilePicked={onFilePicked}
-      />
+      <FilePickerButton onFilePicked={onFilePicked} />
     </div>
   );
 }

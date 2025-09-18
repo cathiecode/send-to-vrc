@@ -14,19 +14,19 @@ export const Valid: Story = {
   args: {
     pickedFileValidity: "valid",
     onOpenClicked: () => {},
-  }
-}
+  },
+};
 
 export const Invalid: Story = {
   args: {
     pickedFileValidity: "invalid",
     onOpenClicked: () => {},
-  }
-}
+  },
+};
 
 export const Pending: Story = {
   args: {
     pickedFileValidity: "pending",
     onOpenClicked: () => {},
-  }
-}
+  },
+};

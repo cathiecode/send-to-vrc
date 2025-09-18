@@ -11,13 +11,14 @@ listen("progress", (event) => {
   progressEventListeners.forEach((listener) => {
     listener(event.payload as ProgressEvent);
   });
-  
 }).catch((e) => {
   console.error("Failed to listen to progress events:", e);
 });
 
 export function useProgressMessage() {
-  const [progressMessage, setProgressMessage] = useState<ProgressEvent | undefined>(lastProgressEvent);
+  const [progressMessage, setProgressMessage] = useState<
+    ProgressEvent | undefined
+  >(lastProgressEvent);
 
   useEffect(() => {
     const listener = (event: ProgressEvent) => {

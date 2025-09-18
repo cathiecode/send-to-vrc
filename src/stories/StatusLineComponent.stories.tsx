@@ -13,20 +13,20 @@ type Story = StoryObj<typeof meta>;
 export const Pending: Story = {
   args: {
     status: "pending",
-    statusText: "アップロード中..."
-  }
+    statusText: "アップロード中...",
+  },
 };
 
 export const Success: Story = {
   args: {
     status: "success",
-    statusText: "アップロード成功"
-  }
+    statusText: "アップロード成功",
+  },
 };
 
 export const Error: Story = {
   args: {
     status: "error",
-    statusText: "アップロード失敗"
-  }
+    statusText: "アップロード失敗",
+  },
 };

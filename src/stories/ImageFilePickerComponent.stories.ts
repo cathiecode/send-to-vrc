@@ -16,22 +16,22 @@ export const Valid: Story = {
     pickedFileValidity: "valid",
     height: "10em",
     onOpenClicked: () => {},
-    imageSrc: "https://avatars.githubusercontent.com/u/25481588?s=200&v=4"
-  }
-}
+    imageSrc: "https://avatars.githubusercontent.com/u/25481588?s=200&v=4",
+  },
+};
 
 export const Invalid: Story = {
   args: {
     pickedFileValidity: "invalid",
     height: "10em",
     onOpenClicked: () => {},
-  }
-}
+  },
+};
 
 export const Pending: Story = {
   args: {
     pickedFileValidity: "pending",
     height: "10em",
     onOpenClicked: () => {},
-  }
-}
+  },
+};

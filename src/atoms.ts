@@ -45,7 +45,7 @@ export const appStateAtom = atom(
   },
   (get, set, newState: AppState) => {
     set(appStateBaseAtom, newState);
-  }
+  },
 );
 
 export type ImageViewerSendState =
@@ -97,7 +97,7 @@ export const fileToSendAtom = atom(
   },
   (_get, set, filePath: string) => {
     set(fileToSendBaseAtom, filePath);
-  }
+  },
 );
 
 export const setFileToSendAtom = atom(null, (_get, set, filePath: string) => {
@@ -129,7 +129,7 @@ export const sendImageToVideoPlayerAtom = atom(
         state: { status: "error", message: String(err) },
       });
     }
-  }
+  },
 );
 
 export const sendImageToImageViewerAtom = atom(
@@ -155,7 +155,7 @@ export const sendImageToImageViewerAtom = atom(
         state: { status: "error", message: String(err) },
       });
     }
-  }
+  },
 );
 
 type Config = {
@@ -168,7 +168,7 @@ export const configAtom = atom(
   } as Config,
   (get, set, newConfig: Partial<Config>) => {
     set(configAtom, { ...get(configAtom), ...newConfig });
-  }
+  },
 );
 
 function mapPromise<T, U>(v: T | Promise<T>, map: (v: T) => U): U | Promise<U> {

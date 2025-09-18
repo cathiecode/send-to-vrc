@@ -1,8 +1,5 @@
 import { Button, Card, Flex, Icon, Spinner } from "@chakra-ui/react";
-import {
-  TbAlertCircleFilled,
-  TbCheck,
-} from "react-icons/tb";
+import { TbAlertCircleFilled, TbCheck } from "react-icons/tb";
 
 type FilePickerComponentProps = {
   pickedFilePath?: string;

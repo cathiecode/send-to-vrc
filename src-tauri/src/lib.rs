@@ -49,7 +49,7 @@ fn get_args() -> Vec<String> {
 #[tauri::command]
 async fn upload_image_to_video_server(
     handle: tauri::AppHandle,
-    file_path: &str
+    file_path: &str,
 ) -> Result<String, String> {
     let ffmpeg_path = handle
         .path()
@@ -68,7 +68,9 @@ async fn upload_image_to_video_server_internal(
     file_path: &str,
     progress_callback: Option<&ProgressCallback>,
 ) -> Result<String, String> {
-    if let Some(cb) = progress_callback { cb(Progress::Starting) }
+    if let Some(cb) = progress_callback {
+        cb(Progress::Starting)
+    }
     let letterboxed_image_path = temp_file_path("letterboxed_image.png")
         .to_string_lossy()
         .into_owned();
@@ -82,35 +84,51 @@ async fn upload_image_to_video_server_internal(
 
     let (width, height) = (1280, 720);
 
-    if let Some(cb) = progress_callback { cb(Progress::Compressing) }
+    if let Some(cb) = progress_callback {
+        cb(Progress::Compressing)
+    }
     resize_image_letterboxed(file_path, &letterboxed_image_path, width, height)?;
     encode_image_to_video(ffmpeg_path, &letterboxed_image_path, &output_video_path).await?;
 
-    if let Some(cb) = progress_callback { cb(Progress::Uploading) }
+    if let Some(cb) = progress_callback {
+        cb(Progress::Uploading)
+    }
     let url = upload_video_to_video_server(&output_video_path).await?;
 
     Ok(url)
 }
 
 #[tauri::command]
-async fn upload_image_to_image_server(handle: tauri::AppHandle, file_path: &str) -> Result<String, String> {
+async fn upload_image_to_image_server(
+    handle: tauri::AppHandle,
+    file_path: &str,
+) -> Result<String, String> {
     let progress_callback = Some(create_progress_callback(&handle));
-    
+
     upload_image_to_image_server_internal(file_path, progress_callback.as_ref()).await
 }
 
-async fn upload_image_to_image_server_internal(file_path: &str, progress_callback: Option<&ProgressCallback>) -> Result<String, String> {
-    if let Some(cb) = progress_callback { cb(Progress::Starting) }
+async fn upload_image_to_image_server_internal(
+    file_path: &str,
+    progress_callback: Option<&ProgressCallback>,
+) -> Result<String, String> {
+    if let Some(cb) = progress_callback {
+        cb(Progress::Starting)
+    }
     let resized_image_path = temp_file_path("resized_image.png")
         .to_string_lossy()
         .into_owned();
 
     let (width, height) = (1920, 1920);
 
-    if let Some(cb) = progress_callback { cb(Progress::Compressing) }
+    if let Some(cb) = progress_callback {
+        cb(Progress::Compressing)
+    }
     resize_image(file_path, &resized_image_path, width, height)?;
 
-    if let Some(cb) = progress_callback { cb(Progress::Uploading) }
+    if let Some(cb) = progress_callback {
+        cb(Progress::Uploading)
+    }
     let url = upload_image_file_to_image_server(&resized_image_path).await?;
 
     Ok(url)

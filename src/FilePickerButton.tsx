@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { useCallback } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 
 type FilePickerButtonProps = {
@@ -25,5 +25,5 @@ export default function FilePickerButton(props: FilePickerButtonProps) {
     });
   }, [onFilePicked]);
 
-  return <button onClick={onOpenClicked}>Open</button>
+  return <button onClick={onOpenClicked}>Open</button>;
 }

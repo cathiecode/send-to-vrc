@@ -15,15 +15,16 @@ type ImageFilePickerComponentProps = {
 };
 
 export default function ImageFilePickerComponent(
-  props: ImageFilePickerComponentProps
+  props: ImageFilePickerComponentProps,
 ) {
-  const { imageSrc, readonly, height, pickedFileValidity, onOpenClicked } = props;
+  const { imageSrc, readonly, height, pickedFileValidity, onOpenClicked } =
+    props;
 
   const { data: imageProps, isLoading: isImagePropsLoading } = useSWR(
     () => imageSrc && [imageSrc, "imageProps"],
     ([imageSrc]) => {
       return extractImageProps(imageSrc);
-    }
+    },
   );
 
   const imageRatio = useMemo(() => {

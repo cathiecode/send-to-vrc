@@ -23,7 +23,7 @@ export default function SendToVideoPlayerMode() {
       case "Uploading":
         return "動画をアップロードしています…";
       default:
-        return "処理を開始しています…"
+        return "処理を開始しています…";
     }
   }, [progressMessage]);
 

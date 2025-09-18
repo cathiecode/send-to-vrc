@@ -15,5 +15,5 @@ export const Default: Story = {
     src: "https://avatars.githubusercontent.com/u/25481588?s=200&v=4",
     width: "10em",
     height: "10em",
-  }
+  },
 };

@@ -62,19 +62,19 @@ export default function SendMode() {
         setFileToSend(filePath);
       }
     },
-    [setFileToSend]
+    [setFileToSend],
   );
 
   const imageFileSrc = useMemo(
     () => pickedFilePath && convertFileSrc(pickedFilePath),
-    [pickedFilePath]
+    [pickedFilePath],
   );
 
   const { data: imageProps } = useSWR(
     imageFileSrc ? [imageFileSrc, "imageProps"] : null,
     ([imageFileSrc]) => {
       return extractImageProps(imageFileSrc);
-    }
+    },
   );
 
   const isFilePicking = sendState?.mode === undefined;
@@ -176,7 +176,11 @@ export default function SendMode() {
               必要な場合、アップロード完了時にURLをクリップボードにコピーします
             </CardDescription>
             <CardAction>
-              <label css={css`padding: .5em;`}>
+              <label
+                css={css`
+                  padding: 0.5em;
+                `}
+              >
                 <input
                   id={copyOnUploadId}
                   type="checkbox"
