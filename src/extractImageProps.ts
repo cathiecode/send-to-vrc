@@ -1,7 +1,7 @@
 export async function extractImageProps(src: string) {
   const image = new window.Image();
 
-  const waitForLoad = new Promise((resolve, reject) => {
+  const waitForLoad = new Promise((resolve) => {
     image.onload = () => resolve(true);
   });
 

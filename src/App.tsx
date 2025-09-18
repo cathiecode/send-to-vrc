@@ -1,5 +1,5 @@
-import { useAtom, useAtomValue } from "jotai";
-import { appStateAtom, fileToSendAtom, optionsAtom } from "./atoms";
+import { useAtomValue } from "jotai";
+import { appStateAtom } from "./atoms";
 import Switch, { Case } from "./Switch";
 import SendMode from "./SendMode";
 import MainMode from "./MainMode";
@@ -8,11 +8,7 @@ import DebugMode from "./DebugMode";
 import { Container } from "@chakra-ui/react";
 
 function App() {
-  const options = useAtomValue(optionsAtom);
-
-  const [appState, setAppState] = useAtom(appStateAtom);
-
-  const fileToSend = useAtomValue(fileToSendAtom);
+  const appState = useAtomValue(appStateAtom);
 
   return (
     <Container>

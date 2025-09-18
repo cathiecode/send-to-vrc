@@ -1,4 +1,3 @@
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { useMemo } from "react";
 import { css } from "storybook/internal/theming";
 import useSWR from "swr";
@@ -20,7 +19,7 @@ export default function ImageFilePickerComponent(
   const { imageSrc, readonly, height, pickedFileValidity, onOpenClicked } =
     props;
 
-  const { data: imageProps, isLoading: isImagePropsLoading } = useSWR(
+  const { data: imageProps } = useSWR(
     () => imageSrc && [imageSrc, "imageProps"],
     ([imageSrc]) => {
       return extractImageProps(imageSrc);

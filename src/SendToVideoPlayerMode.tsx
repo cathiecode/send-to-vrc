@@ -1,9 +1,8 @@
 import { useAtomValue } from "jotai";
 import { sendStateAtom } from "./atoms";
 import StatusLineComponent from "./StatusLineComponent";
-import { Status } from "@chakra-ui/react";
 import { useProgressMessage } from "./useProgressMessage";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 export default function SendToVideoPlayerMode() {
   const state = useAtomValue(sendStateAtom);

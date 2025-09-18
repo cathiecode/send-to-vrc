@@ -43,7 +43,7 @@ export const appStateAtom = atom(
       return { mode: "main" };
     })();
   },
-  (get, set, newState: AppState) => {
+  (_get, set, newState: AppState) => {
     set(appStateBaseAtom, newState);
   },
 );

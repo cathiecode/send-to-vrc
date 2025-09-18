@@ -1,7 +1,5 @@
 import { useCallback } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Text, Card, Icon, Spinner, Box, Flex } from "@chakra-ui/react";
-import { TbCheck } from "react-icons/tb";
 import FilePickerComponent from "./FilePickerComponent";
 
 type FilePickerProps = {
