@@ -180,7 +180,7 @@ export default function SendMode() {
               </CardIcon>
               <CardTitle>自動でクリップボードにコピー</CardTitle>
               <CardDescription>
-                必要な場合、アップロード完了時にURLをクリップボードにコピーします
+                アップロード完了時にURLをクリップボードにコピーします
               </CardDescription>
               <CardAction>
                 <label
