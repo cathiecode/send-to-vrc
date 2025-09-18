@@ -93,15 +93,24 @@ async fn upload_image_to_video_server_internal(
 }
 
 #[tauri::command]
-async fn upload_image_to_image_server(file_path: &str) -> Result<String, String> {
+async fn upload_image_to_image_server(handle: tauri::AppHandle, file_path: &str) -> Result<String, String> {
+    let progress_callback = Some(create_progress_callback(&handle));
+    
+    upload_image_to_image_server_internal(file_path, progress_callback.as_ref()).await
+}
+
+async fn upload_image_to_image_server_internal(file_path: &str, progress_callback: Option<&ProgressCallback>) -> Result<String, String> {
+    if let Some(cb) = progress_callback { cb(Progress::Starting) }
     let resized_image_path = temp_file_path("resized_image.png")
         .to_string_lossy()
         .into_owned();
 
     let (width, height) = (1920, 1920);
 
+    if let Some(cb) = progress_callback { cb(Progress::Compressing) }
     resize_image(file_path, &resized_image_path, width, height)?;
 
+    if let Some(cb) = progress_callback { cb(Progress::Uploading) }
     let url = upload_image_file_to_image_server(&resized_image_path).await?;
 
     Ok(url)
@@ -296,7 +305,7 @@ mod test {
         let input_file =
             std::env::var("CARGO_MANIFEST_DIR").unwrap() + "/test_data/input_image.png";
 
-        let result = super::upload_image_to_image_server(&input_file).await;
+        let result = super::upload_image_to_image_server_internal(&input_file, None).await;
 
         eprintln!("Result: {:?}", result);
         assert!(result.is_ok());

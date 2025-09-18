@@ -1,6 +1,8 @@
 import { useAtomValue } from "jotai";
 import { sendStateAtom } from "./atoms";
 import StatusLineComponent from "./StatusLineComponent";
+import { useProgressMessage } from "./useProgressMessage";
+import { useMemo } from "react";
 
 export default function SendToImageViewerMode() {
   const state = useAtomValue(sendStateAtom);
@@ -8,6 +10,21 @@ export default function SendToImageViewerMode() {
   if (state?.mode !== "image_viewer") {
     return null;
   }
+
+  const progressMessage = useProgressMessage();
+
+  const displayProgressMessage = useMemo(() => {
+    switch (progressMessage) {
+      case "Starting":
+        return "処理が開始されました…";
+      case "Compressing":
+        return "画像を圧縮しています…";
+      case "Uploading":
+        return "画像をアップロードしています…";
+      default:
+        return "処理を開始しています…";
+    }
+  }, [progressMessage]);
 
   return (
     <div>
@@ -17,7 +34,7 @@ export default function SendToImageViewerMode() {
             return (
               <StatusLineComponent
                 status="pending"
-                statusText="アップロードしています..."
+                statusText={displayProgressMessage}
               />
             );
           case "done":
