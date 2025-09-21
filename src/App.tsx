@@ -4,7 +4,6 @@ import Switch, { Case } from "./Switch";
 import SendMode from "./SendMode";
 import MainMode from "./MainMode";
 import { Suspense } from "react";
-import DebugMode from "./DebugMode";
 import AboutMode from "./AboutMode";
 
 function App() {
@@ -21,9 +20,6 @@ function App() {
         </Case>
         <Case value="config">
           <p>Config</p>
-        </Case>
-        <Case value="debug">
-          <DebugMode />
         </Case>
         <Case value="about">
           <AboutMode />
