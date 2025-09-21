@@ -5,6 +5,7 @@ import SendMode from "./SendMode";
 import MainMode from "./MainMode";
 import { Suspense } from "react";
 import DebugMode from "./DebugMode";
+import AboutMode from "./AboutMode";
 
 function App() {
   const appState = useAtomValue(appStateAtom);
@@ -23,6 +24,9 @@ function App() {
         </Case>
         <Case value="debug">
           <DebugMode />
+        </Case>
+        <Case value="about">
+          <AboutMode />
         </Case>
       </Switch>
     </Suspense>

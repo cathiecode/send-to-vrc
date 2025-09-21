@@ -4,6 +4,7 @@ use image::GenericImageView;
 use log::{debug, info};
 use serde::Serialize;
 use tauri::{Emitter, Manager};
+use tauri_plugin_opener::OpenerExt;
 
 #[derive(Clone, Serialize)]
 enum Progress {
@@ -32,6 +33,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             get_args,
+            open_resource_dir,
             is_able_to_read_image_file,
             upload_image_to_video_server,
             upload_image_to_image_server,
@@ -44,6 +46,21 @@ pub fn run() {
 #[tauri::command]
 fn get_args() -> Vec<String> {
     std::env::args().collect()
+}
+
+#[tauri::command]
+fn open_resource_dir(handle: tauri::AppHandle) -> Result<(), String> {
+    let resource_dir = handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("Failed to get resource directory: {:?}", e))?;
+
+    handle
+        .opener()
+        .open_path(resource_dir.as_os_str().to_string_lossy(), None::<&str>)
+        .map_err(|e| format!("Failed to open resource directory: {:?}", e))?;
+
+    Ok(())
 }
 
 #[tauri::command]

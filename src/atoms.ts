@@ -20,7 +20,7 @@ export const argsAtom = atom((_get) => {
 export const optionsAtom = atom((get) => mapPromise(get(argsAtom), parseArgs));
 
 export type AppState = {
-  mode: "unspecified" | "config" | "main" | "send" | "debug";
+  mode: "unspecified" | "config" | "main" | "send" | "debug" | "about";
 };
 
 export const appStateBaseAtom = atom<AppState>({ mode: "unspecified" });

@@ -38,6 +38,10 @@ const Button = styled.button`
       color: ${COLOR[variant].hoverColor};
       border: ${COLOR[variant].hoverBorder};
     }
+
+    &:active {
+      opacity: 0.7;
+    }
   `;
   }}
 

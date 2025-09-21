@@ -1,10 +1,11 @@
 import { useSetAtom } from "jotai";
-import { setFileToSendAtom } from "./atoms";
+import { appStateAtom, setFileToSendAtom } from "./atoms";
 import useFilePickerDialog from "./useFilePickerDialog";
 import Button from "./Button";
 
 export default function MainMode() {
   const setFileToSend = useSetAtom(setFileToSendAtom);
+  const setMode = useSetAtom(appStateAtom);
 
   const onFilePicked = (filePath: string | undefined) => {
     if (filePath) {
@@ -19,6 +20,9 @@ export default function MainMode() {
       <h1>SendToVRC</h1>
       <Button onClick={onFilePickClicked}>
         アップロードする画像ファイルを選択
+      </Button>
+      <Button variant="secondary" onClick={() => setMode({ mode: "about" })}>
+        このソフトウェアについて
       </Button>
     </div>
   );

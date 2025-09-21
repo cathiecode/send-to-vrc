@@ -3,6 +3,9 @@ import { sendStateAtom } from "./atoms";
 import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
 import { useMemo } from "react";
+import { css } from "@emotion/react";
+import Button from "./Button";
+import { TbCopy } from "react-icons/tb";
 
 export default function SendToVideoPlayerMode() {
   const state = useAtomValue(sendStateAtom);
@@ -27,7 +30,14 @@ export default function SendToVideoPlayerMode() {
   }, [progressMessage]);
 
   return (
-    <div>
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25em;
+      `}
+    >
       {(() => {
         switch (state.state.status) {
           case "uploading":
@@ -39,10 +49,18 @@ export default function SendToVideoPlayerMode() {
             );
           case "done":
             return (
-              <StatusLineComponent
-                status="success"
-                statusText="アップロードに成功しました。"
-              />
+              <>
+                <StatusLineComponent
+                  status="success"
+                  statusText="アップロードに成功しました。"
+                />
+                <div>動画プレイヤーにURLを貼り付けてください。(Liveモード)</div>
+                <div>
+                  <Button variant="secondary">
+                    <TbCopy /> コピー
+                  </Button>
+                </div>
+              </>
             );
           case "error":
             return (

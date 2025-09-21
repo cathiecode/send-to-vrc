@@ -203,13 +203,13 @@ export default function SendMode() {
             <ButtonCard
               icon={<TbMovie />}
               title="動画プレイヤーに映す"
-              description="動画プレイヤーに画像を表示する"
+              description="クラウドサービスに動画としてアップロードする"
               onClick={onSendToVideoPlayerClicked}
             />
             <ButtonCard
               icon={<TbPhotoUp />}
               title="静止画ビューアに映す"
-              description="静止画ビューアに画像を表示する"
+              description="クラウドサービスに静止画としてアップロードする"
               onClick={onSendToImageViewerClicked}
             />
             <ButtonCard
