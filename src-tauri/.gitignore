@@ -8,3 +8,5 @@
 
 /resources/THIRDPARTY.frontend
 /resources/THIRDPARTY.backend
+/resources/ffmpeg
+/resources/ffmpeg.exe
