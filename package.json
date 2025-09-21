@@ -20,7 +20,7 @@
     "format:backend": "cd src-tauri && cargo fmt",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "prepare": "husky"
+    "prepare": "husky && node scripts/prepare.js"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.27.0",
