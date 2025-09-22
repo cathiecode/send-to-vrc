@@ -5,6 +5,7 @@ import SendMode from "./SendMode";
 import MainMode from "./MainMode";
 import { Suspense } from "react";
 import AboutMode from "./AboutMode";
+import FileDrop from "./FileDrop";
 
 function App() {
   const appState = useAtomValue(appStateAtom);
@@ -25,6 +26,7 @@ function App() {
           <AboutMode />
         </Case>
       </Switch>
+      <FileDrop />
     </Suspense>
   );
 }
