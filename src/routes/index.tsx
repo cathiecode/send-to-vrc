@@ -1,11 +1,15 @@
+import { setFileToSendAtom } from "@/atoms";
+import Button from "@/Button";
+import useFilePickerDialog from "@/useFilePickerDialog";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
-import { appStateAtom, setFileToSendAtom } from "./atoms";
-import useFilePickerDialog from "./useFilePickerDialog";
-import Button from "./Button";
 
-export default function MainMode() {
+export const Route = createFileRoute("/")({
+  component: Index,
+});
+
+function Index() {
   const setFileToSend = useSetAtom(setFileToSendAtom);
-  const setMode = useSetAtom(appStateAtom);
 
   const onFilePicked = (filePath: string | undefined) => {
     if (filePath) {
@@ -21,9 +25,9 @@ export default function MainMode() {
       <Button onClick={onFilePickClicked}>
         アップロードする画像ファイルを選択
       </Button>
-      <Button variant="secondary" onClick={() => setMode({ mode: "about" })}>
-        このソフトウェアについて
-      </Button>
+      <Link to="/about">
+        <Button variant="secondary">このソフトウェアについて</Button>
+      </Link>
     </div>
   );
 }

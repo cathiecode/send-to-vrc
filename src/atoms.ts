@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { atom } from "jotai";
 import { parseArgs } from "./args";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import router from "./router";
 
 let cachedArgs: string[] | null = null;
 
@@ -18,35 +19,6 @@ export const argsAtom = atom((_get) => {
 });
 
 export const optionsAtom = atom((get) => mapPromise(get(argsAtom), parseArgs));
-
-export type AppState = {
-  mode: "unspecified" | "config" | "main" | "send" | "debug" | "about";
-};
-
-export const appStateBaseAtom = atom<AppState>({ mode: "unspecified" });
-export const appStateAtom = atom(
-  (get) => {
-    const base = get(appStateBaseAtom);
-
-    if (base.mode !== "unspecified") {
-      return base;
-    }
-
-    // NOTE: We do use async function for reader function to prevent suspense.
-    return (async () => {
-      const options = await get(optionsAtom);
-
-      if (options.fileToSend) {
-        return { mode: "send" };
-      }
-
-      return { mode: "main" };
-    })();
-  },
-  (_get, set, newState: AppState) => {
-    set(appStateBaseAtom, newState);
-  },
-);
 
 export type ImageViewerSendState =
   | {
@@ -100,9 +72,14 @@ export const fileToSendAtom = atom(
   },
 );
 
-export const setFileToSendAtom = atom(null, (_get, set, filePath: string) => {
+export const setFileToSendAtom = atom(null, (get, set, filePath: string) => {
+  const sendState = get(sendStateAtom);
+  if (sendState !== undefined && sendState.state.status === "uploading") {
+    return;
+  }
+
   set(fileToSendAtom, filePath);
-  set(appStateAtom, { mode: "send" });
+  router.navigate({ href: "/send" });
   set(sendStateAtom, undefined);
 });
 

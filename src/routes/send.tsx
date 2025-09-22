@@ -1,6 +1,7 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useId, useMemo } from "react";
-import Switch, { Case } from "./Switch";
-import { useImageValidity } from "./useImageValidity";
+import Switch, { Case } from "@/Switch";
+import { useImageValidity } from "@/useImageValidity";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   configAtom,
@@ -9,20 +10,24 @@ import {
   sendStateAtom,
   setFileToSendAtom,
   fileToSendAtom,
-} from "./atoms";
-import SendToVideoPlayerMode from "./SendToVideoPlayerMode";
-import SendToImageViewerMode from "./SendToImageViewerMode";
+} from "@/atoms";
+import SendToVideoPlayerMode from "@/SendToVideoPlayerMode";
+import SendToImageViewerMode from "@/SendToImageViewerMode";
 import useSWR from "swr";
 import { convertFileSrc } from "@tauri-apps/api/core";
 
-import { extractImageProps } from "./extractImageProps";
+import { extractImageProps } from "@/extractImageProps";
 import { css } from "storybook/internal/theming";
-import ImageFilePicker from "./ImageFilePicker";
-import ButtonCard from "./ButtonCard";
+import ImageFilePicker from "@/ImageFilePicker";
+import ButtonCard from "@/ButtonCard";
 import { TbClipboard, TbMovie, TbPhotoUp, TbPrinter } from "react-icons/tb";
-import Card, { CardIcon, CardTitle, CardDescription, CardAction } from "./Card";
+import Card, { CardIcon, CardTitle, CardDescription, CardAction } from "@/Card";
 
-export default function SendMode() {
+export const Route = createFileRoute("/send")({
+  component: SendPage,
+});
+
+function SendPage() {
   const pickedFilePath = useAtomValue(fileToSendAtom);
 
   const sendState = useAtomValue(sendStateAtom);

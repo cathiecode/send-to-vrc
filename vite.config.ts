@@ -1,12 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
+// @ts-expect-error process is a nodejs global
+const dirname = import.meta.dirname;
+
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
   plugins: [
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: true,
+    }),
     react({
       jsxImportSource: "@emotion/react",
       babel: {
@@ -14,7 +22,9 @@ export default defineConfig(async () => ({
       },
     }),
   ],
-
+  resolve: {
+    alias: [{ find: "@/", replacement: `${dirname}/src/` }],
+  },
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent vite from obscuring rust errors

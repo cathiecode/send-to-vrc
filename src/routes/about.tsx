@@ -1,9 +1,14 @@
 import { TbExternalLink } from "react-icons/tb";
-import Button from "./Button";
-import { openResourceDir } from "./ipc";
+import Button from "@/Button";
+import { openResourceDir } from "@/ipc";
 import { css } from "@emotion/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export default function AboutMode() {
+export const Route = createFileRoute("/about")({
+  component: AboutPage,
+});
+
+function AboutPage() {
   return (
     <div>
       <h1
