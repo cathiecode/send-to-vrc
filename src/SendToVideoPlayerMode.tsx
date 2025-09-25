@@ -1,11 +1,12 @@
 import { VideoPlayerSendState } from "./atoms";
 import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { css } from "@emotion/react";
 import Button from "./Button";
 import { TbCopy } from "react-icons/tb";
 import LimitedText from "./LimitedText";
+import useClipboard from "./useClipboard";
 
 type SendToVideoPlayerModeProps = {
   state: VideoPlayerSendState;
@@ -30,6 +31,13 @@ export default function SendToVideoPlayerMode(
         return "処理を開始しています…";
     }
   }, [progressMessage]);
+
+  const { writeText } = useClipboard();
+
+  const onCopyClicked = useCallback(() => {
+    if (state.status !== "done") return;
+    writeText(state.url ?? "");
+  }, [writeText, state]);
 
   return (
     <div
@@ -65,7 +73,7 @@ export default function SendToVideoPlayerMode(
                   `}
                 >
                   <LimitedText width="15em">{state.url}</LimitedText>
-                  <Button variant="secondary">
+                  <Button variant="secondary" onClick={onCopyClicked}>
                     {" "}
                     <TbCopy /> コピー
                   </Button>

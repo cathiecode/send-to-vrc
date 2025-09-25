@@ -2,10 +2,11 @@ import { css } from "@emotion/react";
 import { ImageViewerSendState } from "./atoms";
 import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import LimitedText from "./LimitedText";
 import Button from "./Button";
 import { TbCopy } from "react-icons/tb";
+import useClipboard from "./useClipboard";
 
 type SendToImageViewerMode = {
   state: ImageViewerSendState;
@@ -28,6 +29,13 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
         return "処理を開始しています…";
     }
   }, [progressMessage]);
+
+  const { writeText } = useClipboard();
+
+  const onCopyClicked = useCallback(() => {
+    if (state.status !== "done") return;
+    writeText(state.url ?? "");
+  }, [writeText, state]);
 
   return (
     <div
@@ -63,7 +71,7 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
                   `}
                 >
                   <LimitedText width="15em">{state.url}</LimitedText>
-                  <Button variant="secondary">
+                  <Button variant="secondary" onClick={onCopyClicked}>
                     {" "}
                     <TbCopy /> コピー
                   </Button>
