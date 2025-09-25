@@ -1,14 +1,20 @@
-import { useAtomValue } from "jotai";
-import { sendStateAtom } from "./atoms";
+import { VideoPlayerSendState } from "./atoms";
 import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
 import { useMemo } from "react";
 import { css } from "@emotion/react";
 import Button from "./Button";
 import { TbCopy } from "react-icons/tb";
+import LimitedText from "./LimitedText";
 
-export default function SendToVideoPlayerMode() {
-  const state = useAtomValue(sendStateAtom);
+type SendToVideoPlayerModeProps = {
+  state: VideoPlayerSendState;
+};
+
+export default function SendToVideoPlayerMode(
+  props: SendToVideoPlayerModeProps,
+) {
+  const { state } = props;
 
   const progressMessage = useProgressMessage();
 
@@ -25,10 +31,6 @@ export default function SendToVideoPlayerMode() {
     }
   }, [progressMessage]);
 
-  if (state?.mode !== "video_player") {
-    return null;
-  }
-
   return (
     <div
       css={css`
@@ -39,7 +41,7 @@ export default function SendToVideoPlayerMode() {
       `}
     >
       {(() => {
-        switch (state.state.status) {
+        switch (state.status) {
           case "uploading":
             return (
               <StatusLineComponent
@@ -55,8 +57,14 @@ export default function SendToVideoPlayerMode() {
                   statusText="アップロードに成功しました。"
                 />
                 <div>動画プレイヤーにURLを貼り付けてください。(Liveモード)</div>
-                <div>
-                  https://s2v-usercontent.superneko.net/02649cf3-4061-4fb4-a699-0d5689c3404b.mp4
+                <div
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5em;
+                  `}
+                >
+                  <LimitedText width="15em">{state.url}</LimitedText>
                   <Button variant="secondary">
                     {" "}
                     <TbCopy /> コピー
@@ -68,7 +76,7 @@ export default function SendToVideoPlayerMode() {
             return (
               <StatusLineComponent
                 status="error"
-                statusText={`アップロードに失敗しました。(${state.state.message})`}
+                statusText={`アップロードに失敗しました。(${state.message})`}
               />
             );
         }

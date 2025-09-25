@@ -33,6 +33,7 @@ export default function GraphicButton(props: GraphicButtonProps) {
         cursor: pointer;
         background-color: #000;
         background-size: cover !important;
+        background-position: center !important;
 
         &:hover [data-class="title"] {
           transform: translateY(-1em);
