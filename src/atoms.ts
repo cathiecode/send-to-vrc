@@ -109,6 +109,13 @@ export const sendImageToVideoPlayerAtom = atom(
   },
 );
 
+export const shouldCopyAfterUploadAtom = atom(
+  (get) => get(configAtom).copyOnUpload,
+  (_get, set, v: boolean) => {
+    set(configAtom, { copyOnUpload: v });
+  },
+);
+
 export const sendImageToImageViewerAtom = atom(
   null,
   async (_gte, set, filePath: string) => {
@@ -134,6 +141,19 @@ export const sendImageToImageViewerAtom = atom(
     }
   },
 );
+
+export const copyUploadedUrlToClipboardAtom = atom(null, async (get) => {
+  const sendState = get(sendStateAtom);
+  if (
+    sendState === undefined ||
+    (sendState.mode !== "image_viewer" && sendState.mode !== "video_player") ||
+    sendState.state.status !== "done"
+  ) {
+    return;
+  }
+
+  await writeText(sendState.state.url);
+});
 
 type Config = {
   copyOnUpload: boolean;

@@ -9,16 +9,18 @@ import ButtonCard from "./ButtonCard";
 import { TbClipboard, TbMovie, TbPhotoUp, TbPrinter } from "react-icons/tb";
 import Card, { CardAction, CardDescription, CardIcon, CardTitle } from "./Card";
 import LimitedText from "./LimitedText";
-import { useId } from "react";
+import { useCallback, useId } from "react";
 
 type SendPageComponentProps = {
   sendState: SendState | undefined;
   pickedFilePath: string | undefined;
   imageFileSrc: string | undefined;
   imageValidity: "valid" | "invalid" | "pending";
+  shouldCopyAfterUpload: boolean;
   onFilePicked: (filePath: string | undefined) => void;
   onSendToVideoPlayerClicked: () => void;
   onSendToImageViewerClicked: () => void;
+  onShouldCopyAfterUploadChanged?: (v: boolean) => void;
 };
 
 export default function SendPageComponent(props: SendPageComponentProps) {
@@ -41,6 +43,13 @@ export default function SendPageComponent(props: SendPageComponentProps) {
   );
 
   const checkboxId = useId();
+
+  const onShouldCopyAfterUploadChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      props.onShouldCopyAfterUploadChanged?.(e.target.checked);
+    },
+    [],
+  );
 
   return (
     <div
@@ -85,7 +94,7 @@ export default function SendPageComponent(props: SendPageComponentProps) {
               margin-top 1s 0s,
               height 1s 0s;
             margin-top: 2em;
-            height: 4em;
+            height: 6em;
             ${isFilePicking
               ? "margin-top: 0em; height: 0em; opacity: 0; user-select: none; pointer-events: none;"
               : null}
@@ -155,6 +164,8 @@ export default function SendPageComponent(props: SendPageComponentProps) {
                   css={css`
                     width: 1em;
                   `}
+                  checked={props.shouldCopyAfterUpload}
+                  onChange={onShouldCopyAfterUploadChange}
                 />
               </label>
             </CardAction>

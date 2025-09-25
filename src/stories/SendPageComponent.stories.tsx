@@ -22,6 +22,7 @@ const defaultArgs = {
   pickedFilePath: undefined,
   imageFileSrc: undefined,
   imageValidity: "pending",
+  shouldCopyAfterUpload: true,
   onFilePicked: (_filePath: string | undefined) => {},
   onSendToVideoPlayerClicked: () => {},
   onSendToImageViewerClicked: () => {},

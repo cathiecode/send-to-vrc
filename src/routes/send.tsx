@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { useImageValidity } from "@/useImageValidity";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   sendImageToVideoPlayerAtom,
   sendImageToImageViewerAtom,
   sendStateAtom,
   setFileToSendAtom,
   fileToSendAtom,
+  shouldCopyAfterUploadAtom,
 } from "@/atoms";
 import { convertFileSrc } from "@tauri-apps/api/core";
 
@@ -61,15 +62,21 @@ function SendPage() {
     [pickedFilePath],
   );
 
+  const [shouldCopyAfterUpload, setShouldCopyAfterUpload] = useAtom(
+    shouldCopyAfterUploadAtom,
+  );
+
   return (
     <SendPageComponent
       sendState={sendState}
       pickedFilePath={pickedFilePath}
       imageFileSrc={imageFileSrc}
       imageValidity={imageValidity}
+      shouldCopyAfterUpload={shouldCopyAfterUpload}
       onFilePicked={onFilePicked}
       onSendToImageViewerClicked={onSendToImageViewerClicked}
       onSendToVideoPlayerClicked={onSendToVideoPlayerClicked}
+      onShouldCopyAfterUploadChanged={setShouldCopyAfterUpload}
     />
   );
 }
