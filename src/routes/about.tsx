@@ -4,6 +4,7 @@ import { openResourceDir } from "@/ipc";
 import { css } from "@emotion/react";
 import { createFileRoute } from "@tanstack/react-router";
 import Container from "@/Container";
+import Logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/about")({
   component: AboutPage,
@@ -12,12 +13,29 @@ export const Route = createFileRoute("/about")({
 function AboutPage() {
   return (
     <Container>
+      <div
+        css={css`
+          text-align: center;
+        `}
+      >
+        <img
+          css={css`
+            background-color: #fff;
+            border-radius: 50%;
+            padding: 0.5em;
+          `}
+          src={Logo}
+          alt=""
+          width="128"
+          height="128"
+        />
+      </div>
       <h1
         css={css`
           text-align: center;
         `}
       >
-        About
+        Send to VRC
       </h1>
       <div
         css={css`
@@ -29,7 +47,7 @@ function AboutPage() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Send to VRC
+          GitHub
         </a>
       </div>
       <p>
@@ -43,7 +61,7 @@ function AboutPage() {
       </p>
       <h2>製作者</h2>
       <p>
-        Catherine キャサリン
+        Catherine キャサリン (
         <a
           href="https://github.com/cathiecode"
           target="_blank"
@@ -51,6 +69,7 @@ function AboutPage() {
         >
           @cathiecode
         </a>
+        )
       </p>
       <h2>サードパーティのライセンス</h2>
       <p>
