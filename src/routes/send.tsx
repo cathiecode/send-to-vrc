@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useId, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import Switch, { Case } from "@/Switch";
 import { useImageValidity } from "@/useImageValidity";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import {
-  configAtom,
   sendImageToVideoPlayerAtom,
   sendImageToImageViewerAtom,
   sendStateAtom,
@@ -19,9 +18,10 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { extractImageProps } from "@/extractImageProps";
 import { css } from "storybook/internal/theming";
 import ImageFilePicker from "@/ImageFilePicker";
-import ButtonCard from "@/ButtonCard";
-import { TbClipboard, TbMovie, TbPhotoUp, TbPrinter } from "react-icons/tb";
-import Card, { CardIcon, CardTitle, CardDescription, CardAction } from "@/Card";
+import GraphicButton from "@/GraphicButton";
+import Video from "@/assets/Video.png";
+import Tab from "@/assets/Tab.png";
+import Print from "@/assets/Print.png";
 
 export const Route = createFileRoute("/send")({
   component: SendPage,
@@ -54,10 +54,6 @@ function SendPage() {
 
     sendImageToImageViewer(pickedFilePath);
   }, [pickedFilePath]);
-
-  const [config, setConfig] = useAtom(configAtom);
-
-  const copyOnUploadId = useId();
 
   const setFileToSend = useSetAtom(setFileToSendAtom);
 
@@ -172,48 +168,25 @@ function SendPage() {
             flex-direction: column;
           `}
         >
-          <Card>
-            <CardIcon>
-              <TbClipboard />
-            </CardIcon>
-            <CardTitle>自動でクリップボードにコピー</CardTitle>
-            <CardDescription>
-              アップロード完了時にURLをクリップボードにコピーします
-            </CardDescription>
-            <CardAction>
-              <label
-                css={css`
-                  padding: 0.5em;
-                `}
-              >
-                <input
-                  id={copyOnUploadId}
-                  type="checkbox"
-                  checked={config.copyOnUpload}
-                  onChange={(ev) =>
-                    setConfig({ copyOnUpload: ev.currentTarget.checked })
-                  }
-                />
-              </label>
-            </CardAction>
-          </Card>
-
-          <ButtonCard
-            icon={<TbMovie />}
+          <GraphicButton
             title="動画プレイヤーに映す"
             description="クラウドサービスに動画としてアップロードする"
+            background={`url(${Video})`}
+            baseColor="rgba(30, 133, 133, 1)"
             onClick={onSendToVideoPlayerClicked}
           />
-          <ButtonCard
-            icon={<TbPhotoUp />}
+          <GraphicButton
             title="静止画ビューアに映す"
             description="クラウドサービスに静止画としてアップロードする"
+            background={`url(${Tab})`}
+            baseColor="rgba(30, 99, 133, 1)"
             onClick={onSendToImageViewerClicked}
           />
-          <ButtonCard
-            icon={<TbPrinter />}
+          <GraphicButton
             title="VRChat Printで印刷する"
             description="VRChat Printとして画像をアップロードします(開発中)"
+            background={`url(${Print})`}
+            baseColor="rgba(133, 98, 30, 1)"
             onClick={() => alert("開発中です!")}
           />
         </div>
