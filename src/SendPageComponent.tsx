@@ -2,13 +2,14 @@ import { css } from "@emotion/react";
 import ImageFilePicker from "./ImageFilePicker";
 import SendToVideoPlayerMode from "./SendToVideoPlayerMode";
 import SendToImageViewerMode from "./SendToImageViewerMode";
-import GraphicButton from "./GraphicButton";
 import { SendState } from "./atoms";
 import useSWR from "swr";
 import { extractImageProps } from "./extractImageProps";
-import Video from "@/assets/Video.png";
-import Tab from "@/assets/Tab.png";
-import Print from "@/assets/Print.png";
+import ButtonCard from "./ButtonCard";
+import { TbClipboard, TbMovie, TbPhotoUp, TbPrinter } from "react-icons/tb";
+import Card, { CardAction, CardDescription, CardIcon, CardTitle } from "./Card";
+import LimitedText from "./LimitedText";
+import { useId } from "react";
 
 type SendPageComponentProps = {
   sendState: SendState | undefined;
@@ -38,6 +39,8 @@ export default function SendPageComponent(props: SendPageComponentProps) {
       return extractImageProps(imageFileSrc);
     },
   );
+
+  const checkboxId = useId();
 
   return (
     <div
@@ -129,25 +132,49 @@ export default function SendPageComponent(props: SendPageComponentProps) {
             flex-direction: column;
           `}
         >
-          <GraphicButton
+          <Card>
+            <CardIcon>
+              <TbClipboard />
+            </CardIcon>
+            <CardTitle>自動でクリップボードにコピー</CardTitle>
+            <CardDescription>
+              <LimitedText>
+                アップロード完了時にURLをクリップボードにコピーします
+              </LimitedText>
+            </CardDescription>
+            <CardAction>
+              <label
+                css={css`
+                  padding: 0.5em;
+                `}
+                htmlFor={checkboxId}
+              >
+                <input
+                  type="checkbox"
+                  id={checkboxId}
+                  css={css`
+                    width: 1em;
+                  `}
+                />
+              </label>
+            </CardAction>
+          </Card>
+          <ButtonCard
+            icon={<TbMovie />}
             title="動画プレイヤーに映す"
             description="クラウドサービスに動画としてアップロードする"
-            background={`url(${Video})`}
-            baseColor="rgba(30, 133, 133, 1)"
             onClick={onSendToVideoPlayerClicked}
           />
-          <GraphicButton
+          <ButtonCard
+            icon={<TbPhotoUp />}
             title="静止画ビューアに映す"
             description="クラウドサービスに静止画としてアップロードする"
-            background={`url(${Tab})`}
-            baseColor="rgba(30, 99, 133, 1)"
             onClick={onSendToImageViewerClicked}
           />
-          <GraphicButton
+          <ButtonCard
+            icon={<TbPrinter />}
             title="VRChat Printで印刷する"
             description="VRChat Printとして画像をアップロードします(開発中)"
-            background={`url(${Print})`}
-            baseColor="rgba(133, 98, 30, 1)"
             onClick={() => alert("開発中です!")}
           />
         </div>
