@@ -1,5 +1,4 @@
 import type { Preview } from "@storybook/react-vite";
-import { Provider } from "../src/components/ui/provider";
 
 const preview: Preview = {
   parameters: {
@@ -17,13 +16,7 @@ const preview: Preview = {
       test: "todo",
     },
   },
-  decorators: [
-    (Story) => (
-      <Provider>
-        <Story />
-      </Provider>
-    ),
-  ],
+  decorators: [(Story) => <Story />],
 };
 
 export default preview;
