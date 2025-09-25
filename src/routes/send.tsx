@@ -87,6 +87,8 @@ function SendPage() {
   return (
     <div
       css={css`
+        position: relative;
+        flex-grow: 1;
         & * {
           box-sizing: border-box;
         }
@@ -94,136 +96,126 @@ function SendPage() {
     >
       <div
         css={css`
-          position: fixed;
-          top: 0;
+          display: flex;
+          position: absolute;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          height: 20em;
+          top: 0em;
           left: 0;
           right: 0;
-          bottom: 0;
+          transition: height 1s;
+          ${isFilePicking ? "" : "height: calc(100% - 4em);"}
+        `}
+      >
+        <ImageFilePicker
+          pickedFilePath={pickedFilePath}
+          imageSrc={imageProps?.src}
+          height="20em"
+          maxWidth="calc(100% - 8em)"
+          readonly={!isFilePicking}
+          pickedFileValidity={imageValidity}
+          onFilePicked={onFilePicked}
+        />
+        <div
+          css={css`
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition:
+              margin-top 1s 0s,
+              height 1s 0s;
+            margin-top: 2em;
+            height: 4em;
+            ${isFilePicking
+              ? "margin-top: 0em; height: 0em; opacity: 0; user-select: none; pointer-events: none;"
+              : null}
+            ${!isFilePicking ? "animation: fadeIn 1s 1s both;" : null}
+            @keyframes fadeIn {
+              0% {
+                opacity: 0;
+              }
+              100% {
+                opacity: 1;
+              }
+            }
+          `}
+        >
+          <Switch value={sendState?.mode}>
+            <Case value="video_player">
+              <SendToVideoPlayerMode />
+            </Case>
+            <Case value="image_viewer">
+              <SendToImageViewerMode />
+            </Case>
+          </Switch>
+        </div>
+      </div>
+      <div
+        css={css`
+          position: absolute;
+          width: 100%;
+          padding: 2em;
+          padding-top: 0;
+          top: 22em;
+          transition: opacity 0.25s;
+          ${!isFilePicking
+            ? "opacity: 0; user-select: none; pointer-events: none;"
+            : ""}
         `}
       >
         <div
           css={css`
             display: flex;
-            position: absolute;
-            align-items: center;
-            justify-content: center;
+            gap: 0.25em;
             flex-direction: column;
-            height: 20em;
-            top: 2em;
-            left: 0;
-            right: 0;
-            transition: height 1s;
-            ${isFilePicking ? "" : "height: calc(100% - 4em);"}
           `}
         >
-          <ImageFilePicker
-            pickedFilePath={pickedFilePath}
-            imageSrc={imageProps?.src}
-            height="20em"
-            maxWidth="calc(100% - 8em)"
-            readonly={!isFilePicking}
-            pickedFileValidity={imageValidity}
-            onFilePicked={onFilePicked}
-          />
-          <div
-            css={css`
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              transition:
-                margin-top 1s 0s,
-                height 1s 0s;
-              margin-top: 2em;
-              height: 4em;
-              ${isFilePicking
-                ? "margin-top: 0em; height: 0em; opacity: 0; user-select: none; pointer-events: none;"
-                : null}
-              ${!isFilePicking ? "animation: fadeIn 1s 1s both;" : null}
-            @keyframes fadeIn {
-                0% {
-                  opacity: 0;
-                }
-                100% {
-                  opacity: 1;
-                }
-              }
-            `}
-          >
-            <Switch value={sendState?.mode}>
-              <Case value="video_player">
-                <SendToVideoPlayerMode />
-              </Case>
-              <Case value="image_viewer">
-                <SendToImageViewerMode />
-              </Case>
-            </Switch>
-          </div>
-        </div>
-        <div
-          css={css`
-            position: absolute;
-            width: 100%;
-            padding: 2em;
-            padding-top: 0;
-            top: 24em;
-            transition: opacity 0.25s;
-            ${!isFilePicking
-              ? "opacity: 0; user-select: none; pointer-events: none;"
-              : ""}
-          `}
-        >
-          <div
-            css={css`
-              display: flex;
-              gap: 0.25em;
-              flex-direction: column;
-            `}
-          >
-            <Card>
-              <CardIcon>
-                <TbClipboard />
-              </CardIcon>
-              <CardTitle>自動でクリップボードにコピー</CardTitle>
-              <CardDescription>
-                アップロード完了時にURLをクリップボードにコピーします
-              </CardDescription>
-              <CardAction>
-                <label
-                  css={css`
-                    padding: 0.5em;
-                  `}
-                >
-                  <input
-                    id={copyOnUploadId}
-                    type="checkbox"
-                    checked={config.copyOnUpload}
-                    onChange={(ev) =>
-                      setConfig({ copyOnUpload: ev.currentTarget.checked })
-                    }
-                  />
-                </label>
-              </CardAction>
-            </Card>
+          <Card>
+            <CardIcon>
+              <TbClipboard />
+            </CardIcon>
+            <CardTitle>自動でクリップボードにコピー</CardTitle>
+            <CardDescription>
+              アップロード完了時にURLをクリップボードにコピーします
+            </CardDescription>
+            <CardAction>
+              <label
+                css={css`
+                  padding: 0.5em;
+                `}
+              >
+                <input
+                  id={copyOnUploadId}
+                  type="checkbox"
+                  checked={config.copyOnUpload}
+                  onChange={(ev) =>
+                    setConfig({ copyOnUpload: ev.currentTarget.checked })
+                  }
+                />
+              </label>
+            </CardAction>
+          </Card>
 
-            <ButtonCard
-              icon={<TbMovie />}
-              title="動画プレイヤーに映す"
-              description="クラウドサービスに動画としてアップロードする"
-              onClick={onSendToVideoPlayerClicked}
-            />
-            <ButtonCard
-              icon={<TbPhotoUp />}
-              title="静止画ビューアに映す"
-              description="クラウドサービスに静止画としてアップロードする"
-              onClick={onSendToImageViewerClicked}
-            />
-            <ButtonCard
-              icon={<TbPrinter />}
-              title="VRChat Printで印刷する"
-              description="VRChat Printとして画像をアップロードします(開発中)"
-              onClick={() => alert("開発中です!")}
-            />
-          </div>
+          <ButtonCard
+            icon={<TbMovie />}
+            title="動画プレイヤーに映す"
+            description="クラウドサービスに動画としてアップロードする"
+            onClick={onSendToVideoPlayerClicked}
+          />
+          <ButtonCard
+            icon={<TbPhotoUp />}
+            title="静止画ビューアに映す"
+            description="クラウドサービスに静止画としてアップロードする"
+            onClick={onSendToImageViewerClicked}
+          />
+          <ButtonCard
+            icon={<TbPrinter />}
+            title="VRChat Printで印刷する"
+            description="VRChat Printとして画像をアップロードします(開発中)"
+            onClick={() => alert("開発中です!")}
+          />
         </div>
       </div>
     </div>

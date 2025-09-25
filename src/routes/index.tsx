@@ -1,6 +1,8 @@
 import { setFileToSendAtom } from "@/atoms";
 import Button from "@/Button";
+import Container from "@/Container";
 import useFilePickerDialog from "@/useFilePickerDialog";
+import { css } from "@emotion/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 
@@ -20,14 +22,20 @@ function Index() {
   const onFilePickClicked = useFilePickerDialog(onFilePicked);
 
   return (
-    <div>
-      <h1>SendToVRC</h1>
+    <Container>
+      <h1
+        css={css`
+          margin-top: 0;
+        `}
+      >
+        SendToVRC
+      </h1>
       <Button onClick={onFilePickClicked}>
         アップロードする画像ファイルを選択
       </Button>
       <Link to="/about">
         <Button variant="secondary">このソフトウェアについて</Button>
       </Link>
-    </div>
+    </Container>
   );
 }

@@ -3,6 +3,7 @@ import Button from "@/Button";
 import { openResourceDir } from "@/ipc";
 import { css } from "@emotion/react";
 import { createFileRoute } from "@tanstack/react-router";
+import Container from "@/Container";
 
 export const Route = createFileRoute("/about")({
   component: AboutPage,
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/about")({
 
 function AboutPage() {
   return (
-    <div>
+    <Container>
       <h1
         css={css`
           text-align: center;
@@ -71,6 +72,6 @@ function AboutPage() {
         キャサリン Catherine及び本ソフトウェアの開発者はSend to
         VRCの使用に起因または関連するいかなる損害についても責任を負いません。
       </p>
-    </div>
+    </Container>
   );
 }

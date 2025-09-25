@@ -56,7 +56,9 @@ export default function SendToVideoPlayerMode() {
                 />
                 <div>動画プレイヤーにURLを貼り付けてください。(Liveモード)</div>
                 <div>
+                  https://s2v-usercontent.superneko.net/02649cf3-4061-4fb4-a699-0d5689c3404b.mp4
                   <Button variant="secondary">
+                    {" "}
                     <TbCopy /> コピー
                   </Button>
                 </div>
