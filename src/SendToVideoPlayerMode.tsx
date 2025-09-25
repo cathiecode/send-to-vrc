@@ -10,10 +10,6 @@ import { TbCopy } from "react-icons/tb";
 export default function SendToVideoPlayerMode() {
   const state = useAtomValue(sendStateAtom);
 
-  if (state?.mode !== "video_player") {
-    return null;
-  }
-
   const progressMessage = useProgressMessage();
 
   const displayProgressMessage = useMemo(() => {
@@ -28,6 +24,10 @@ export default function SendToVideoPlayerMode() {
         return "処理を開始しています…";
     }
   }, [progressMessage]);
+
+  if (state?.mode !== "video_player") {
+    return null;
+  }
 
   return (
     <div

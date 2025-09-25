@@ -7,10 +7,6 @@ import { useMemo } from "react";
 export default function SendToImageViewerMode() {
   const state = useAtomValue(sendStateAtom);
 
-  if (state?.mode !== "image_viewer") {
-    return null;
-  }
-
   const progressMessage = useProgressMessage();
 
   const displayProgressMessage = useMemo(() => {
@@ -25,6 +21,10 @@ export default function SendToImageViewerMode() {
         return "処理を開始しています…";
     }
   }, [progressMessage]);
+
+  if (state?.mode !== "image_viewer") {
+    return null;
+  }
 
   return (
     <div>
