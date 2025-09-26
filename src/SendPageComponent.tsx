@@ -6,7 +6,7 @@ import { SendState } from "./atoms";
 import useSWR from "swr";
 import { extractImageProps } from "./extractImageProps";
 import ButtonCard from "./ButtonCard";
-import { TbClipboard, TbMovie, TbPhotoUp, TbPrinter } from "react-icons/tb";
+import { TbClipboard, TbMovie, TbPhotoUp } from "react-icons/tb";
 import Card, { CardAction, CardDescription, CardIcon, CardTitle } from "./Card";
 import LimitedText from "./LimitedText";
 import { useCallback, useId } from "react";
@@ -182,13 +182,6 @@ export default function SendPageComponent(props: SendPageComponentProps) {
             title="静止画ビューアに映す"
             description="クラウドサービスに静止画としてアップロードする"
             onClick={onSendToImageViewerClicked}
-            disabled={imageValidity !== "valid"}
-          />
-          <ButtonCard
-            icon={<TbPrinter />}
-            title="VRChat Printで印刷する"
-            description="VRChat Printとして画像をアップロードします(開発中)"
-            onClick={() => alert("開発中です!")}
             disabled={imageValidity !== "valid"}
           />
         </div>
