@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { css } from "storybook/internal/theming";
 import useSWR from "swr";
 import { extractImageProps } from "./extractImageProps";
+import { TbPhotoQuestion } from "react-icons/tb";
 
 type ImageFilePickerComponentProps = {
   imageSrc?: string;
@@ -116,6 +117,31 @@ export default function ImageFilePickerComponent(
             ${pickedFileValidity === "valid" ? "opacity: 1" : "opacity: 0"}
           `}
         />
+
+        {pickedFileValidity !== "invalid" ? null : (
+          <div
+            css={css`
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              width: 100%;
+              transform: translate(-50%, -50%);
+              color: #666;
+              text-align: center;
+              font-size: 0.8em;
+            `}
+          >
+            <TbPhotoQuestion
+              css={css`
+                font-size: 2em;
+              `}
+            />
+            <br />
+            指定されたファイルを読み込めませんでした。
+            <br />
+            他の画像ファイルを選択してください。
+          </div>
+        )}
 
         {readonly ? null : (
           <button
