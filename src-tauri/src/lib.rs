@@ -6,6 +6,8 @@ use serde::Serialize;
 use tauri::{Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 
+mod build_config;
+
 #[derive(Clone, Serialize)]
 enum Progress {
     Starting,
@@ -401,12 +403,15 @@ async fn upload_video_to_video_server(video_file_path: &str) -> Result<String, S
     let client = reqwest::Client::new();
 
     let result = client
-        .post("https://s2v-upload.superneko.net/upload?ext=mp4")
+        .post(format!(
+            "{}/upload?ext=mp4",
+            build_config::get_uploader_url_base_url()
+        ))
         .body(reader)
         .header("Content-Length", length)
         .header(
             "Authorization",
-            "Bearer 97095649-1ffc-43a3-bd46-f2f3acaf2acc",
+            format!("Bearer {}", build_config::get_uploader_api_key()),
         )
         .send()
         .await;
@@ -460,12 +465,15 @@ async fn upload_image_file_to_image_server(image_file_path: &str) -> Result<Stri
     let client = reqwest::Client::new();
 
     let result = client
-        .post("https://s2v-upload.superneko.net/upload?ext=png")
+        .post(format!(
+            "{}/upload?ext=png",
+            build_config::get_uploader_url_base_url()
+        ))
         .body(reader)
         .header("Content-Length", length)
         .header(
             "Authorization",
-            "Bearer 97095649-1ffc-43a3-bd46-f2f3acaf2acc",
+            format!("Bearer {}", build_config::get_uploader_api_key()),
         )
         .send()
         .await;

@@ -10,3 +10,5 @@
 /resources/THIRDPARTY.backend
 /resources/ffmpeg
 /resources/ffmpeg.exe
+
+/src/build_config.rs
