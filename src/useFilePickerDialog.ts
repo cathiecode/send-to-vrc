@@ -8,6 +8,23 @@ export default function useFilePickerDialog(
     open({
       multiple: false,
       directory: false,
+      filters: [
+        {
+          name: "Image",
+          extensions: [
+            "avif",
+            "bmp",
+            "exr",
+            "gif",
+            "jpeg",
+            "jpg",
+            "png",
+            "pnm",
+            "tiff",
+            "webp",
+          ],
+        },
+      ],
     }).then((selected) => {
       if (typeof selected === "string") {
         if (onFilePicked) {
