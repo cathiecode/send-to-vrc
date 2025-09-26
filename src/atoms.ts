@@ -85,7 +85,7 @@ export const setFileToSendAtom = atom(null, (get, set, filePath: string) => {
 
 export const sendImageToVideoPlayerAtom = atom(
   null,
-  async (_get, set, filePath: string) => {
+  async (get, set, filePath: string) => {
     set(sendStateAtom, {
       mode: "video_player",
       state: { status: "uploading" },
@@ -94,7 +94,9 @@ export const sendImageToVideoPlayerAtom = atom(
     try {
       const url = await invoke("upload_image_to_video_server", { filePath });
 
-      await writeText(url as string);
+      if (get(shouldCopyAfterUploadAtom)) {
+        await writeText(url as string);
+      }
 
       set(sendStateAtom, {
         mode: "video_player",
@@ -118,7 +120,7 @@ export const shouldCopyAfterUploadAtom = atom(
 
 export const sendImageToImageViewerAtom = atom(
   null,
-  async (_gte, set, filePath: string) => {
+  async (get, set, filePath: string) => {
     set(sendStateAtom, {
       mode: "image_viewer",
       state: { status: "uploading" },
@@ -127,7 +129,9 @@ export const sendImageToImageViewerAtom = atom(
     try {
       const url = await invoke("upload_image_to_image_server", { filePath });
 
-      await writeText(url as string);
+      if (get(shouldCopyAfterUploadAtom)) {
+        await writeText(url as string);
+      }
 
       set(sendStateAtom, {
         mode: "image_viewer",
