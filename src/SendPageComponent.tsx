@@ -175,18 +175,21 @@ export default function SendPageComponent(props: SendPageComponentProps) {
             title="動画プレイヤーに映す"
             description="クラウドサービスに動画としてアップロードする"
             onClick={onSendToVideoPlayerClicked}
+            disabled={imageValidity !== "valid"}
           />
           <ButtonCard
             icon={<TbPhotoUp />}
             title="静止画ビューアに映す"
             description="クラウドサービスに静止画としてアップロードする"
             onClick={onSendToImageViewerClicked}
+            disabled={imageValidity !== "valid"}
           />
           <ButtonCard
             icon={<TbPrinter />}
             title="VRChat Printで印刷する"
             description="VRChat Printとして画像をアップロードします(開発中)"
             onClick={() => alert("開発中です!")}
+            disabled={imageValidity !== "valid"}
           />
         </div>
       </div>
