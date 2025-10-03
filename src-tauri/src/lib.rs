@@ -31,7 +31,6 @@ fn create_progress_callback(handle: &tauri::AppHandle) -> ProgressCallback {
 }
 
 fn generate_binding_file(builder: &tauri_specta::Builder<tauri::Wry>) {
-    #[cfg(debug_assertions)] // <- Only export on non-release builds
     let binding_str = builder
         .export_str(specta_typescript::Typescript::default())
         .expect("Failed to export typescript bindings");
