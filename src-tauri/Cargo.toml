@@ -31,4 +31,8 @@ tauri-plugin-dialog = "2"
 tauri-plugin-log = "2"
 log = "0.4.28"
 tauri-plugin-clipboard-manager = "2"
-
+anyhow = "1.0.100"
+thiserror = "2.0.17"
+specta = { version = "=2.0.0-rc.22", features = ["serde", "serde_json"] }
+specta-typescript = "0.0.9"
+tauri-specta = { version = "=2.0.0-rc.21", features = ["derive", "typescript"] }

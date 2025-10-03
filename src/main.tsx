@@ -2,11 +2,11 @@ import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.scss";
-import { invoke } from "@tauri-apps/api/core";
 import { parseArgs } from "./args";
+import { commands } from "./bindings.gen";
 
 async function main() {
-  const args = await invoke("get_args");
+  const args = await commands.getArgs();
 
   const options = parseArgs(args as string[]);
 

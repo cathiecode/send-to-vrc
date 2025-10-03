@@ -2,11 +2,15 @@ use std::path::PathBuf;
 
 use image::GenericImageView;
 use log::{debug, info};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use specta::Type;
 use tauri::{Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 
+use crate::error::AppError;
+
 mod build_config;
+mod error;
 
 #[derive(Clone, Serialize)]
 enum Progress {
@@ -26,67 +30,110 @@ fn create_progress_callback(handle: &tauri::AppHandle) -> ProgressCallback {
     })
 }
 
+fn generate_binding_file(builder: &tauri_specta::Builder<tauri::Wry>) {
+    #[cfg(debug_assertions)] // <- Only export on non-release builds
+    let binding_str = builder
+        .export_str(specta_typescript::Typescript::default())
+        .expect("Failed to export typescript bindings");
+
+    let header_str = "// @ts-nocheck";
+
+    std::fs::write(
+        "../src/bindings.gen.ts",
+        format!("{}\n{}", header_str, binding_str),
+    )
+    .expect("Failed to write typescript bindings");
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_clipboard_manager::init())
-        .plugin(tauri_plugin_log::Builder::new().build())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![
+    let builder = tauri_specta::Builder::<tauri::Wry>::new()
+        // Then register them (separated by a comma)
+        .commands(tauri_specta::collect_commands![
             get_args,
             open_resource_dir,
             is_able_to_read_image_file,
             upload_image_to_video_server,
             upload_image_to_image_server,
-            upload_image_to_vrchat_print
-        ])
+            upload_image_to_vrchat_print,
+            load_config_file,
+            save_config_file,
+            register_anonymously,
+            get_tos_and_version,
+        ]);
+
+    #[cfg(debug_assertions)] // <- Only export on non-release builds
+    generate_binding_file(&builder);
+
+    tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_log::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
+        .invoke_handler(builder.invoke_handler())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 #[tauri::command]
+#[specta::specta]
 fn get_args() -> Vec<String> {
     std::env::args().collect()
 }
 
 #[tauri::command]
-fn open_resource_dir(handle: tauri::AppHandle) -> Result<(), String> {
+#[specta::specta]
+fn open_resource_dir(handle: tauri::AppHandle) -> Result<(), AppError> {
     let resource_dir = handle
         .path()
         .resource_dir()
-        .map_err(|e| format!("Failed to get resource directory: {:?}", e))?;
+        .map_err(AppError::from_error_with_message(
+            "Failed to get resource directory",
+        ))?;
 
     handle
         .opener()
         .open_path(resource_dir.as_os_str().to_string_lossy(), None::<&str>)
-        .map_err(|e| format!("Failed to open resource directory: {:?}", e))?;
+        .map_err(AppError::from_error_with_message(
+            "Failed to open resource directory",
+        ))?;
 
     Ok(())
 }
 
 #[tauri::command]
+#[specta::specta]
 async fn upload_image_to_video_server(
     handle: tauri::AppHandle,
     file_path: &str,
-) -> Result<String, String> {
+    api_key: &str,
+) -> Result<String, AppError> {
     let ffmpeg_path = handle
         .path()
         .resolve("resources/ffmpeg.exe", tauri::path::BaseDirectory::Resource)
-        .map_err(|e| format!("Failed to resolve ffmpeg path: {:?}", e))?
+        .map_err(AppError::from_error_with_message(
+            "Failed to resolve ffmpeg path",
+        ))?
         .to_string_lossy()
         .into_owned();
 
     let progress_callback = Some(create_progress_callback(&handle));
 
-    upload_image_to_video_server_internal(&ffmpeg_path, file_path, progress_callback.as_ref()).await
+    upload_image_to_video_server_internal(
+        &ffmpeg_path,
+        file_path,
+        api_key,
+        progress_callback.as_ref(),
+    )
+    .await
 }
 
 async fn upload_image_to_video_server_internal(
     ffmpeg_path: &str,
     file_path: &str,
+    api_key: &str,
     progress_callback: Option<&ProgressCallback>,
-) -> Result<String, String> {
+) -> Result<String, AppError> {
     if let Some(cb) = progress_callback {
         cb(Progress::Starting)
     }
@@ -112,25 +159,28 @@ async fn upload_image_to_video_server_internal(
     if let Some(cb) = progress_callback {
         cb(Progress::Uploading)
     }
-    let url = upload_video_to_video_server(&output_video_path).await?;
+    let url = upload_video_to_video_server(&output_video_path, api_key).await?;
 
     Ok(url)
 }
 
 #[tauri::command]
+#[specta::specta]
 async fn upload_image_to_image_server(
     handle: tauri::AppHandle,
     file_path: &str,
-) -> Result<String, String> {
+    api_key: &str,
+) -> Result<String, AppError> {
     let progress_callback = Some(create_progress_callback(&handle));
 
-    upload_image_to_image_server_internal(file_path, progress_callback.as_ref()).await
+    upload_image_to_image_server_internal(file_path, api_key, progress_callback.as_ref()).await
 }
 
 async fn upload_image_to_image_server_internal(
     file_path: &str,
+    api_key: &str,
     progress_callback: Option<&ProgressCallback>,
-) -> Result<String, String> {
+) -> Result<String, AppError> {
     if let Some(cb) = progress_callback {
         cb(Progress::Starting)
     }
@@ -143,31 +193,35 @@ async fn upload_image_to_image_server_internal(
     if let Some(cb) = progress_callback {
         cb(Progress::Compressing)
     }
-    resize_image(file_path, &resized_image_path, width, height)?;
+
+    resize_image(file_path, &resized_image_path, width, height)
+        .map_err(AppError::from_error_with_message("Failed to resize image"))?;
 
     if let Some(cb) = progress_callback {
         cb(Progress::Uploading)
     }
-    let url = upload_image_file_to_image_server(&resized_image_path).await?;
+    let url = upload_image_file_to_image_server(&resized_image_path, api_key).await?;
 
     Ok(url)
 }
 
 #[tauri::command]
+#[specta::specta]
 async fn upload_image_to_vrchat_print(
     file_path: &str,
     vrchat_api_key: String,
-) -> Result<(), String> {
+) -> Result<(), AppError> {
     let path = std::path::Path::new(file_path);
 
     if !path.exists() {
-        return Err("File does not exist".into());
+        return Err(AppError::Unknown("File does not exist".to_string()));
     }
 
     send_file_to_print(path, vrchat_api_key).await
 }
 
 #[tauri::command]
+#[specta::specta]
 async fn is_able_to_read_image_file(file_path: &str) -> Result<bool, ()> {
     Ok(image::open(file_path).is_ok())
 }
@@ -175,9 +229,10 @@ async fn is_able_to_read_image_file(file_path: &str) -> Result<bool, ()> {
 async fn send_file_to_print(
     file_path: &std::path::Path,
     vrchat_api_key: String,
-) -> Result<(), String> {
-    let bytes =
-        std::fs::read(file_path).map_err(|e| format!("failed to get file bytes: {:?}", e))?;
+) -> Result<(), AppError> {
+    let bytes = std::fs::read(file_path).map_err(AppError::from_error_with_message(
+        "failed to get file bytes",
+    ))?;
 
     debug!("Read {} bytes from file {:?}", bytes.len(), file_path);
 
@@ -189,7 +244,9 @@ async fn send_file_to_print(
             reqwest::multipart::Part::bytes(bytes)
                 .file_name("image")
                 .mime_str("image/png")
-                .map_err(|e| format!("Failed to create file part: {:?}", e))?,
+                .map_err(AppError::from_error_with_message(
+                    "Failed to create file part",
+                ))?,
         )
         .text(
             "timestamp",
@@ -206,14 +263,17 @@ async fn send_file_to_print(
         .multipart(form)
         .send()
         .await
-        .map_err(|e| format!("Failed to upload file: {:?}", e))?;
+        .map_err(AppError::from_error_with_message("Failed to upload file"))?;
 
     debug!("Response: {:?}", response);
 
     if !response.status().is_success() {
         let text = response.text().await;
         // log::debug!("Response text: {:?}", text);
-        return Err(format!("Failed to upload file: {:?}", text));
+        return Err(AppError::Unknown(format!(
+            "Failed to upload file: {:?}",
+            text
+        )));
     }
 
     info!("File uploaded successfully.");
@@ -226,26 +286,30 @@ fn resize_image_letterboxed(
     output_path: &str,
     width: u32,
     height: u32,
-) -> Result<(), String> {
+) -> Result<(), AppError> {
     // read the image with "image" crate
-    let img = image::open(image_path).map_err(|e| format!("Failed to open image: {}", e))?;
+    let img = image::open(image_path)
+        .map_err(AppError::from_error_with_message("Failed to open image"))?;
 
     // resize the image
     let resized = img.resize(width, height, image::imageops::FilterType::Lanczos3);
 
     // render letterboxed image with "tiny-skia" crate
-    let mut canvas = tiny_skia::Pixmap::new(width, height).ok_or("Failed to create canvas")?;
+    let mut canvas = tiny_skia::Pixmap::new(width, height)
+        .ok_or(AppError::Unknown("Failed to create canvas".to_string()))?;
     canvas.fill(tiny_skia::Color::WHITE); // fill with white background
     let (resized_width, resized_height) = resized.dimensions();
     let x_offset = (width - resized_width) / 2;
     let y_offset = (height - resized_height) / 2;
     let resized_rgba = resized.to_rgba8();
 
-    let size = tiny_skia::IntSize::from_wh(resized_width, resized_height)
-        .ok_or("Failed to create pixmap with input dimensions")?;
+    let size = tiny_skia::IntSize::from_wh(resized_width, resized_height).ok_or(
+        AppError::Unknown("Failed to create pixmap with input dimensions".to_string()),
+    )?;
 
-    let resized_pixmap = tiny_skia::Pixmap::from_vec(resized_rgba.into_raw(), size)
-        .ok_or("Failed to create pixmap from resized image")?;
+    let resized_pixmap = tiny_skia::Pixmap::from_vec(resized_rgba.into_raw(), size).ok_or(
+        AppError::Unknown("Failed to create pixmap from resized image".to_string()),
+    )?;
 
     canvas.draw_pixmap(
         x_offset as i32,
@@ -258,7 +322,9 @@ fn resize_image_letterboxed(
 
     canvas
         .save_png(output_path)
-        .map_err(|e| format!("Failed to save resized image: {}", e))?;
+        .map_err(AppError::from_error_with_message(
+            "Failed to save resized image",
+        ))?;
 
     Ok(())
 }
@@ -268,9 +334,10 @@ fn resize_image(
     output_path: &str,
     width: u32,
     height: u32,
-) -> Result<(), String> {
+) -> Result<(), AppError> {
     // read the image with "image" crate
-    let img = image::open(image_path).map_err(|e| format!("Failed to open image: {}", e))?;
+    let img = image::open(image_path)
+        .map_err(AppError::from_error_with_message("Failed to open image"))?;
 
     // resize the image
     let resized = img.resize(width, height, image::imageops::FilterType::Lanczos3);
@@ -278,14 +345,16 @@ fn resize_image(
     // save the resized image
     resized
         .save(output_path)
-        .map_err(|e| format!("Failed to save resized image: {}", e))?;
+        .map_err(AppError::from_error_with_message(
+            "Failed to save resized image",
+        ))?;
 
     Ok(())
 }
 
 #[cfg(test)]
 mod test {
-    use crate::upload_image_to_video_server_internal;
+    use crate::{build_config::get_test_api_key, upload_image_to_video_server_internal};
 
     #[test]
     fn test_resize_image() {
@@ -330,7 +399,13 @@ mod test {
 
         let ffmpeg_path = std::env::var("CARGO_MANIFEST_DIR").unwrap() + "/resources/ffmpeg.exe";
 
-        let result = upload_image_to_video_server_internal(&ffmpeg_path, &input_file, None).await;
+        let result = upload_image_to_video_server_internal(
+            &ffmpeg_path,
+            &input_file,
+            get_test_api_key(),
+            None,
+        )
+        .await;
 
         eprintln!("Result: {:?}", result);
 
@@ -342,10 +417,34 @@ mod test {
         let input_file =
             std::env::var("CARGO_MANIFEST_DIR").unwrap() + "/test_data/input_image.png";
 
-        let result = super::upload_image_to_image_server_internal(&input_file, None).await;
+        let result =
+            super::upload_image_to_image_server_internal(&input_file, get_test_api_key(), None)
+                .await;
 
         eprintln!("Result: {:?}", result);
         assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_load_tos() {
+        let result = super::get_tos_and_version().await;
+
+        eprintln!("Result: {:?}", result);
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_register_anonymously() {
+        let result = super::register_anonymously(1).await;
+        eprintln!("Result: {:?}", result);
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_register_anonymously_fail() {
+        let result = super::register_anonymously(9999).await;
+        eprintln!("Result: {:?}", result);
+        assert!(result.is_err());
     }
 }
 
@@ -353,7 +452,7 @@ async fn encode_image_to_video(
     ffmpeg_path: &str,
     image_file_path: &str,
     output_video_path: &str,
-) -> Result<(), String> {
+) -> Result<(), AppError> {
     // Use ffmpeg to encode the image into a video
 
     let status = tokio::process::Command::new(ffmpeg_path)
@@ -375,139 +474,278 @@ async fn encode_image_to_video(
         ])
         .status()
         .await
-        .map_err(|e| format!("Failed to execute ffmpeg: {}", e))?;
+        .map_err(AppError::from_error_with_message(
+            "Failed to execute ffmpeg",
+        ))?;
 
     if !status.success() {
-        return Err(format!("ffmpeg exited with status: {}", status));
+        return Err(AppError::Unknown(format!(
+            "ffmpeg exited with status {}",
+            status
+        )));
     }
 
     Ok(())
 }
 
 #[derive(serde::Deserialize)]
-struct VideoServerResponse {
+struct UploaderResponse {
     pub url: String,
 }
 
-async fn upload_video_to_video_server(video_file_path: &str) -> Result<String, String> {
-    info!("Uploading video file: {}", video_file_path);
+async fn upload_file_to_uploader(
+    file_path: &str,
+    api_key: &str,
+    ext: &str,
+) -> Result<String, AppError> {
+    info!("Uploading file: {}", file_path);
 
-    let length = std::fs::metadata(video_file_path)
-        .map_err(|e| format!("Failed to get video file metadata: {}", e))?
+    let length = std::fs::metadata(file_path)
+        .map_err(AppError::from_error_with_message(
+            "Failed to get file metadata",
+        ))?
         .len();
 
-    let reader = tokio::fs::File::open(video_file_path)
+    let reader = tokio::fs::File::open(file_path)
         .await
-        .map_err(|e| format!("Failed to open video file: {}", e))?;
+        .map_err(AppError::from_error_with_message("Failed to open file"))?;
 
     let client = reqwest::Client::new();
 
     let result = client
         .post(format!(
-            "{}/upload?ext=mp4",
-            build_config::get_uploader_url_base_url()
+            "{}/upload?ext={}",
+            build_config::get_uploader_url_base_url(),
+            ext
         ))
         .body(reader)
         .header("Content-Length", length)
-        .header(
-            "Authorization",
-            format!("Bearer {}", build_config::get_uploader_api_key()),
-        )
+        .header("Authorization", format!("Bearer {}", api_key))
         .send()
         .await;
 
     if let Err(e) = result {
-        return Err(format!("Failed to upload video: {}", e));
+        return Err(AppError::from_error_with_message("Failed to file")(e));
     }
 
     let response = result.unwrap();
 
     if !response.status().is_success() {
-        return Err(format!(
-            "Video upload failed with status: {}, {}",
+        if response.status() == reqwest::StatusCode::FORBIDDEN {
+            return Err(AppError::UploaderAuthRequired(
+                "Authentication required for uploader".to_string(),
+            ));
+        }
+
+        return Err(AppError::Unknown(format!(
+            "File upload failed with status: {}, {}",
             response.status(),
             response
                 .text()
                 .await
                 .unwrap_or("(Failed to read response text)".into())
-        ));
+        )));
     }
 
     let text = response
         .text()
         .await
-        .map_err(|e| format!("Failed to read response text: {}", e))?;
+        .map_err(AppError::from_error_with_message(
+            "Failed to read response text",
+        ))?;
 
-    let video_response: VideoServerResponse =
-        serde_json::from_str(&text).map_err(|e| format!("Failed to parse response JSON: {}", e))?;
+    let upload_response: UploaderResponse = serde_json::from_str(&text).map_err(
+        AppError::from_error_with_message("Failed to parse response JSON"),
+    )?;
 
-    info!("Video uploaded successfully: {}", video_response.url);
+    info!("File uploaded successfully: {}", upload_response.url);
 
-    Ok(video_response.url)
+    Ok(upload_response.url)
 }
 
-#[derive(serde::Deserialize)]
-struct ImageServerResponse {
-    pub url: String,
+async fn upload_video_to_video_server(
+    video_file_path: &str,
+    api_key: &str,
+) -> Result<String, AppError> {
+    upload_file_to_uploader(video_file_path, api_key, "mp4").await
 }
 
-async fn upload_image_file_to_image_server(image_file_path: &str) -> Result<String, String> {
-    info!("Uploading image file: {}", image_file_path);
+async fn upload_image_file_to_image_server(
+    image_file_path: &str,
+    api_key: &str,
+) -> Result<String, AppError> {
+    upload_file_to_uploader(image_file_path, api_key, "png").await
+}
 
-    let length = std::fs::metadata(image_file_path)
-        .map_err(|e| format!("Failed to get image file metadata: {}", e))?
-        .len();
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+struct Tos {
+    version: i32,
+    content: String,
+}
 
-    let reader = tokio::fs::File::open(image_file_path)
-        .await
-        .map_err(|e| format!("Failed to open image file: {}", e))?;
-
+#[tauri::command]
+#[specta::specta]
+async fn get_tos_and_version() -> Result<Tos, AppError> {
     let client = reqwest::Client::new();
+
+    let response = client
+        .get(format!(
+            "{}/registration/tos",
+            build_config::get_uploader_url_base_url()
+        ))
+        .send()
+        .await
+        .map_err(AppError::from_error_with_message("Failed to get ToS"))?;
+
+    if !response.status().is_success() {
+        return Err(AppError::Unknown(format!(
+            "Failed to get ToS: {}",
+            response.status()
+        )));
+    }
+
+    let text = response
+        .text()
+        .await
+        .map_err(AppError::from_error_with_message(
+            "Failed to read ToS response text",
+        ))?;
+
+    let tos: Tos = serde_json::from_str(&text).map_err(AppError::from_error_with_message(
+        "Failed to parse ToS JSON",
+    ))?;
+
+    Ok(tos)
+}
+
+#[derive(Serialize)]
+struct AnonymousRegisterRequestTos {
+    accept: bool,
+    version: i32,
+}
+
+#[derive(Serialize)]
+struct AnonymousRegisterRequest {
+    tos: AnonymousRegisterRequestTos,
+    date: String,
+}
+
+#[derive(Deserialize)]
+struct AnonymousRegisterResponse {
+    token: String,
+}
+
+#[tauri::command]
+#[specta::specta]
+async fn register_anonymously(accepted_tos_version: i32) -> Result<String, AppError> {
+    let client = reqwest::Client::new();
+
+    let body = serde_json::to_string(&AnonymousRegisterRequest {
+        tos: AnonymousRegisterRequestTos {
+            accept: true,
+            version: accepted_tos_version,
+        },
+        // 20250924T015117+0900
+        date: chrono::Utc::now().format("%Y%m%dT%H%M%S%z").to_string(),
+    })
+    .map_err(AppError::from_error_with_message(
+        "Failed to serialize anonymous registration request",
+    ))?;
 
     let result = client
         .post(format!(
-            "{}/upload?ext=png",
+            "{}/registration/anonymous",
             build_config::get_uploader_url_base_url()
         ))
-        .body(reader)
-        .header("Content-Length", length)
-        .header(
-            "Authorization",
-            format!("Bearer {}", build_config::get_uploader_api_key()),
-        )
+        .body(body)
+        .header("Content-Type", "application/json")
         .send()
-        .await;
+        .await
+        .map_err(AppError::from_error_with_message(
+            "Failed to send anonymous registration request",
+        ))?;
 
-    if let Err(e) = result {
-        return Err(format!("Failed to upload image: {}", e));
+    if !result.status().is_success() {
+        return Err(AppError::Unknown(format!(
+            "Anonymous registration failed: {}",
+            result.status()
+        )));
     }
 
-    let response = result.unwrap();
+    let text = result
+        .text()
+        .await
+        .map_err(AppError::from_error_with_message(
+            "Failed to read anonymous registration response text",
+        ))?;
 
-    if !response.status().is_success() {
-        return Err(format!(
-            "Image upload failed with status: {}, {}",
-            response.status(),
-            response
-                .text()
-                .await
-                .unwrap_or("(Failed to read response text)".into())
+    let response: AnonymousRegisterResponse = serde_json::from_str(&text).map_err(
+        AppError::from_error_with_message("Failed to parse anonymous registration response JSON"),
+    )?;
+
+    info!(
+        "Anonymous registration successful. Token: {}",
+        response.token
+    );
+
+    Ok(response.token)
+}
+
+#[tauri::command]
+#[specta::specta]
+fn load_config_file(handle: tauri::AppHandle) -> Result<String, AppError> {
+    let config_path = config_file_path(handle)?;
+
+    if !config_path.exists() {
+        return Err(AppError::ConfigExistance(format!(
+            "Config file does not exist: {:?}",
+            config_path
+        )));
+    }
+
+    let contents = std::fs::read_to_string(&config_path).map_err(
+        AppError::from_error_with_message("Failed to read configuration file"),
+    )?;
+
+    Ok(contents)
+}
+
+#[tauri::command]
+#[specta::specta]
+fn save_config_file(handle: tauri::AppHandle, contents: &str) -> Result<(), AppError> {
+    let config_path = config_file_path(handle)?;
+
+    if let Some(parent) = config_path.parent() {
+        if !parent.exists() {
+            std::fs::create_dir_all(parent).map_err(AppError::from_error_with_message(
+                "Failed to create config directory",
+            ))?;
+        }
+    } else {
+        return Err(AppError::ConfigDirectoryExistance(
+            "Config file has no parent directory".to_string(),
         ));
     }
 
-    let text = response
-        .text()
-        .await
-        .map_err(|e| format!("Failed to read response text: {}", e))?;
+    std::fs::write(&config_path, contents).map_err(AppError::from_error_with_message(
+        "Failed to write configuration file",
+    ))?;
 
-    let image_response: ImageServerResponse =
-        serde_json::from_str(&text).map_err(|e| format!("Failed to parse response JSON: {}", e))?;
-
-    info!("Image uploaded successfully: {}", image_response.url);
-
-    Ok(image_response.url)
+    Ok(())
 }
 
 fn temp_file_path(name: &str) -> PathBuf {
     std::env::temp_dir().join(name)
+}
+
+fn config_file_path(handle: tauri::AppHandle) -> Result<PathBuf, AppError> {
+    let config_path = handle
+        .path()
+        .app_config_dir()
+        .map_err(AppError::from_error_with_message(
+            "Failed to get app config directory",
+        ))?
+        .join("config.json");
+
+    Ok(config_path)
 }

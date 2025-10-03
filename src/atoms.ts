@@ -3,6 +3,10 @@ import { atom } from "jotai";
 import { parseArgs } from "./args";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import router from "./router";
+import { createTaskAtom } from "./task";
+import { Config, loadConfig, saveConfig } from "./config";
+import { atomWithRefresh } from "jotai/utils";
+import { commands } from "./bindings.gen";
 
 let cachedArgs: string[] | null = null;
 
@@ -92,16 +96,52 @@ export const sendImageToVideoPlayerAtom = atom(
     });
 
     try {
-      const url = await invoke("upload_image_to_video_server", { filePath });
+      for (let i = 0; i < 3; i++) {
+        const apiKey = (await get(configAtom)).uploaderApiKey;
 
-      if (get(shouldCopyAfterUploadAtom)) {
-        await writeText(url as string);
+        if (apiKey === undefined) {
+          // TODO
+          await new Promise((resolve, reject) =>
+            set(registerRequestAtom, { resolve, reject }),
+          );
+
+          continue; // Retry
+        }
+
+        const result = await commands.uploadImageToVideoServer(
+          filePath,
+          apiKey,
+        );
+
+        if (result.status === "error") {
+          if (result.error.type === "UploaderAuthRequired") {
+            await new Promise((resolve, reject) =>
+              set(registerRequestAtom, { resolve, reject }),
+            );
+
+            continue; // Retry
+          }
+
+          throw new Error(`アップロードに失敗しました: ${result.error}`);
+        }
+
+        const url = result.data;
+
+        if (get(shouldCopyAfterUploadAtom)) {
+          await writeText(url);
+        }
+
+        set(sendStateAtom, {
+          mode: "video_player",
+          state: { status: "done", url: url },
+        });
+
+        return;
       }
 
-      set(sendStateAtom, {
-        mode: "video_player",
-        state: { status: "done", url: url as string },
-      });
+      throw new Error(
+        "アップロードに失敗しました: 不明な原因により失敗しました",
+      );
     } catch (err) {
       set(sendStateAtom, {
         mode: "video_player",
@@ -112,8 +152,8 @@ export const sendImageToVideoPlayerAtom = atom(
 );
 
 export const shouldCopyAfterUploadAtom = atom(
-  (get) => get(configAtom).copyOnUpload,
-  (_get, set, v: boolean) => {
+  (get) => mapPromise(get(configAtom), (c) => c.copyOnUpload),
+  async (_get, set, v: boolean) => {
     set(configAtom, { copyOnUpload: v });
   },
 );
@@ -127,16 +167,52 @@ export const sendImageToImageViewerAtom = atom(
     });
 
     try {
-      const url = await invoke("upload_image_to_image_server", { filePath });
+      for (let i = 0; i < 3; i++) {
+        const apiKey = (await get(configAtom)).uploaderApiKey;
 
-      if (get(shouldCopyAfterUploadAtom)) {
-        await writeText(url as string);
+        if (apiKey === undefined) {
+          // TODO
+          await new Promise((resolve, reject) =>
+            set(registerRequestAtom, { resolve, reject }),
+          );
+
+          continue; // Retry
+        }
+
+        const result = await commands.uploadImageToImageServer(
+          filePath,
+          apiKey,
+        );
+
+        if (result.status === "error") {
+          if (result.error.type === "UploaderAuthRequired") {
+            await new Promise((resolve, reject) =>
+              set(registerRequestAtom, { resolve, reject }),
+            );
+
+            continue; // Retry
+          }
+
+          throw new Error(`アップロードに失敗しました: ${result.error}`);
+        }
+
+        const url = result.data;
+
+        if (get(shouldCopyAfterUploadAtom)) {
+          await writeText(url);
+        }
+
+        set(sendStateAtom, {
+          mode: "image_viewer",
+          state: { status: "done", url: url },
+        });
+
+        return;
       }
 
-      set(sendStateAtom, {
-        mode: "image_viewer",
-        state: { status: "done", url: url as string },
-      });
+      throw new Error(
+        "アップロードに失敗しました: 不明な原因により失敗しました",
+      );
     } catch (err) {
       set(sendStateAtom, {
         mode: "image_viewer",
@@ -146,16 +222,33 @@ export const sendImageToImageViewerAtom = atom(
   },
 );
 
-type Config = {
-  copyOnUpload: boolean;
-};
+export const registerRequestAtom = createTaskAtom<void>();
+
+let configCache: Config | null = null;
+
+const configValueAtom = atomWithRefresh<Config | Promise<Config>>(() => {
+  if (!configCache) {
+    return (async () => {
+      configCache = await loadConfig();
+
+      return configCache;
+    })();
+  }
+  return configCache;
+});
 
 export const configAtom = atom(
-  {
-    copyOnUpload: true,
-  } as Config,
-  (get, set, newConfig: Partial<Config>) => {
-    set(configAtom, { ...get(configAtom), ...newConfig });
+  (get) => {
+    return get(configValueAtom);
+  },
+  async (get, set, partialConfig: Partial<Config>) => {
+    const oldConfig = await get(configAtom);
+
+    configCache = { ...oldConfig, ...partialConfig };
+
+    await saveConfig(configCache);
+
+    set(configValueAtom);
   },
 );
 
