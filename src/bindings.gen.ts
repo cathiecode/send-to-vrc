@@ -25,17 +25,17 @@ async isAbleToReadImageFile(filePath: string) : Promise<Result<boolean, null>> {
     else return { status: "error", error: e  as any };
 }
 },
-async uploadImageToVideoServer(filePath: string, apiKey: string) : Promise<Result<string, AppError>> {
+async uploadImageToVideoServer(filePath: string, apiKey: string, uploaderBaseUrl: string) : Promise<Result<string, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("upload_image_to_video_server", { filePath, apiKey }) };
+    return { status: "ok", data: await TAURI_INVOKE("upload_image_to_video_server", { filePath, apiKey, uploaderBaseUrl }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async uploadImageToImageServer(filePath: string, apiKey: string) : Promise<Result<string, AppError>> {
+async uploadImageToImageServer(filePath: string, apiKey: string, uploaderBaseUrl: string) : Promise<Result<string, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("upload_image_to_image_server", { filePath, apiKey }) };
+    return { status: "ok", data: await TAURI_INVOKE("upload_image_to_image_server", { filePath, apiKey, uploaderBaseUrl }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -65,17 +65,17 @@ async saveConfigFile(contents: string) : Promise<Result<null, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
-async registerAnonymously(acceptedTosVersion: number) : Promise<Result<string, AppError>> {
+async registerAnonymously(acceptedTosVersion: number, uploaderBaseUrl: string) : Promise<Result<string, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("register_anonymously", { acceptedTosVersion }) };
+    return { status: "ok", data: await TAURI_INVOKE("register_anonymously", { acceptedTosVersion, uploaderBaseUrl }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async getTosAndVersion() : Promise<Result<Tos, AppError>> {
+async getTosAndVersion(uploaderBaseUrl: string) : Promise<Result<Tos, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_tos_and_version") };
+    return { status: "ok", data: await TAURI_INVOKE("get_tos_and_version", { uploaderBaseUrl }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };

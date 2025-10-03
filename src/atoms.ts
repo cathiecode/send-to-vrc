@@ -97,7 +97,9 @@ export const sendImageToVideoPlayerAtom = atom(
 
     try {
       for (let i = 0; i < 3; i++) {
-        const apiKey = (await get(configAtom)).uploaderApiKey;
+        const config = await get(configAtom);
+        const apiKey = config.uploaderApiKey;
+        const baseUrl = config.uploaderUrlBase;
 
         if (apiKey === undefined) {
           // TODO
@@ -111,6 +113,7 @@ export const sendImageToVideoPlayerAtom = atom(
         const result = await commands.uploadImageToVideoServer(
           filePath,
           apiKey,
+          baseUrl,
         );
 
         if (result.status === "error") {
@@ -168,7 +171,9 @@ export const sendImageToImageViewerAtom = atom(
 
     try {
       for (let i = 0; i < 3; i++) {
-        const apiKey = (await get(configAtom)).uploaderApiKey;
+        const config = await get(configAtom);
+        const apiKey = config.uploaderApiKey;
+        const baseUrl = config.uploaderUrlBase;
 
         if (apiKey === undefined) {
           // TODO
@@ -182,6 +187,7 @@ export const sendImageToImageViewerAtom = atom(
         const result = await commands.uploadImageToImageServer(
           filePath,
           apiKey,
+          baseUrl,
         );
 
         if (result.status === "error") {

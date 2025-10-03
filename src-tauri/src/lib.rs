@@ -107,6 +107,7 @@ async fn upload_image_to_video_server(
     handle: tauri::AppHandle,
     file_path: &str,
     api_key: &str,
+    uploader_base_url: &str,
 ) -> Result<String, AppError> {
     let ffmpeg_path = handle
         .path()
@@ -123,6 +124,7 @@ async fn upload_image_to_video_server(
         &ffmpeg_path,
         file_path,
         api_key,
+        uploader_base_url,
         progress_callback.as_ref(),
     )
     .await
@@ -132,6 +134,7 @@ async fn upload_image_to_video_server_internal(
     ffmpeg_path: &str,
     file_path: &str,
     api_key: &str,
+    uploader_base_url: &str,
     progress_callback: Option<&ProgressCallback>,
 ) -> Result<String, AppError> {
     if let Some(cb) = progress_callback {
@@ -159,7 +162,7 @@ async fn upload_image_to_video_server_internal(
     if let Some(cb) = progress_callback {
         cb(Progress::Uploading)
     }
-    let url = upload_video_to_video_server(&output_video_path, api_key).await?;
+    let url = upload_video_to_video_server(&output_video_path, api_key, uploader_base_url).await?;
 
     Ok(url)
 }
@@ -170,15 +173,23 @@ async fn upload_image_to_image_server(
     handle: tauri::AppHandle,
     file_path: &str,
     api_key: &str,
+    uploader_base_url: &str,
 ) -> Result<String, AppError> {
     let progress_callback = Some(create_progress_callback(&handle));
 
-    upload_image_to_image_server_internal(file_path, api_key, progress_callback.as_ref()).await
+    upload_image_to_image_server_internal(
+        file_path,
+        api_key,
+        uploader_base_url,
+        progress_callback.as_ref(),
+    )
+    .await
 }
 
 async fn upload_image_to_image_server_internal(
     file_path: &str,
     api_key: &str,
+    uploader_base_url: &str,
     progress_callback: Option<&ProgressCallback>,
 ) -> Result<String, AppError> {
     if let Some(cb) = progress_callback {
@@ -200,7 +211,8 @@ async fn upload_image_to_image_server_internal(
     if let Some(cb) = progress_callback {
         cb(Progress::Uploading)
     }
-    let url = upload_image_file_to_image_server(&resized_image_path, api_key).await?;
+    let url =
+        upload_image_file_to_image_server(&resized_image_path, api_key, uploader_base_url).await?;
 
     Ok(url)
 }
@@ -354,7 +366,10 @@ fn resize_image(
 
 #[cfg(test)]
 mod test {
-    use crate::{build_config::get_test_api_key, upload_image_to_video_server_internal};
+    use crate::{
+        build_config::{get_test_api_key, get_test_uploader_url_base_url},
+        upload_image_to_video_server_internal,
+    };
 
     #[test]
     fn test_resize_image() {
@@ -403,6 +418,7 @@ mod test {
             &ffmpeg_path,
             &input_file,
             get_test_api_key(),
+            get_test_uploader_url_base_url(),
             None,
         )
         .await;
@@ -417,9 +433,13 @@ mod test {
         let input_file =
             std::env::var("CARGO_MANIFEST_DIR").unwrap() + "/test_data/input_image.png";
 
-        let result =
-            super::upload_image_to_image_server_internal(&input_file, get_test_api_key(), None)
-                .await;
+        let result = super::upload_image_to_image_server_internal(
+            &input_file,
+            get_test_api_key(),
+            get_test_uploader_url_base_url(),
+            None,
+        )
+        .await;
 
         eprintln!("Result: {:?}", result);
         assert!(result.is_ok());
@@ -427,7 +447,7 @@ mod test {
 
     #[tokio::test]
     async fn test_load_tos() {
-        let result = super::get_tos_and_version().await;
+        let result = super::get_tos_and_version(get_test_uploader_url_base_url()).await;
 
         eprintln!("Result: {:?}", result);
         assert!(result.is_ok());
@@ -435,14 +455,14 @@ mod test {
 
     #[tokio::test]
     async fn test_register_anonymously() {
-        let result = super::register_anonymously(1).await;
+        let result = super::register_anonymously(1, get_test_uploader_url_base_url()).await;
         eprintln!("Result: {:?}", result);
         assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_register_anonymously_fail() {
-        let result = super::register_anonymously(9999).await;
+        let result = super::register_anonymously(9999, get_test_uploader_url_base_url()).await;
         eprintln!("Result: {:?}", result);
         assert!(result.is_err());
     }
@@ -497,6 +517,7 @@ async fn upload_file_to_uploader(
     file_path: &str,
     api_key: &str,
     ext: &str,
+    uploader_base_url: &str,
 ) -> Result<String, AppError> {
     info!("Uploading file: {}", file_path);
 
@@ -513,11 +534,7 @@ async fn upload_file_to_uploader(
     let client = reqwest::Client::new();
 
     let result = client
-        .post(format!(
-            "{}/upload?ext={}",
-            build_config::get_uploader_url_base_url(),
-            ext
-        ))
+        .post(format!("{}/upload?ext={}", uploader_base_url, ext))
         .body(reader)
         .header("Content-Length", length)
         .header("Authorization", format!("Bearer {}", api_key))
@@ -566,15 +583,17 @@ async fn upload_file_to_uploader(
 async fn upload_video_to_video_server(
     video_file_path: &str,
     api_key: &str,
+    uploader_base_url: &str,
 ) -> Result<String, AppError> {
-    upload_file_to_uploader(video_file_path, api_key, "mp4").await
+    upload_file_to_uploader(video_file_path, api_key, "mp4", uploader_base_url).await
 }
 
 async fn upload_image_file_to_image_server(
     image_file_path: &str,
     api_key: &str,
+    uploader_base_url: &str,
 ) -> Result<String, AppError> {
-    upload_file_to_uploader(image_file_path, api_key, "png").await
+    upload_file_to_uploader(image_file_path, api_key, "png", uploader_base_url).await
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type)]
@@ -585,14 +604,11 @@ struct Tos {
 
 #[tauri::command]
 #[specta::specta]
-async fn get_tos_and_version() -> Result<Tos, AppError> {
+async fn get_tos_and_version(uploader_base_url: &str) -> Result<Tos, AppError> {
     let client = reqwest::Client::new();
 
     let response = client
-        .get(format!(
-            "{}/registration/tos",
-            build_config::get_uploader_url_base_url()
-        ))
+        .get(format!("{}/registration/tos", uploader_base_url))
         .send()
         .await
         .map_err(AppError::from_error_with_message("Failed to get ToS"))?;
@@ -637,7 +653,10 @@ struct AnonymousRegisterResponse {
 
 #[tauri::command]
 #[specta::specta]
-async fn register_anonymously(accepted_tos_version: i32) -> Result<String, AppError> {
+async fn register_anonymously(
+    accepted_tos_version: i32,
+    uploader_base_url: &str,
+) -> Result<String, AppError> {
     let client = reqwest::Client::new();
 
     let body = serde_json::to_string(&AnonymousRegisterRequest {
@@ -653,10 +672,7 @@ async fn register_anonymously(accepted_tos_version: i32) -> Result<String, AppEr
     ))?;
 
     let result = client
-        .post(format!(
-            "{}/registration/anonymous",
-            build_config::get_uploader_url_base_url()
-        ))
+        .post(format!("{}/registration/anonymous", uploader_base_url))
         .body(body)
         .header("Content-Type", "application/json")
         .send()

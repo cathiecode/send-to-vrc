@@ -6,14 +6,14 @@ import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { commands } from "@/bindings.gen";
 import StatusLineComponent from "./StatusLineComponent";
-import { useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 
 function RegisterOverlayContents() {
   const taskRequest = useTaskRequestAtom(registerRequestAtom);
-  const setConfig = useSetAtom(configAtom);
+  const [config, setConfig] = useAtom(configAtom);
 
-  const { data: tos } = useSWR("tos", async () => {
-    return await commands.getTosAndVersion();
+  const { data: tos } = useSWR([config.uploaderUrlBase, "tos"], async () => {
+    return await commands.getTosAndVersion(config.uploaderUrlBase);
   });
 
   const tosContent = useMemo(() => {
@@ -31,7 +31,10 @@ function RegisterOverlayContents() {
       return;
     }
 
-    const result = await commands.registerAnonymously(tos.data.version);
+    const result = await commands.registerAnonymously(
+      tos.data.version,
+      config.uploaderUrlBase,
+    );
 
     if (result.status === "error") {
       taskRequest?.reject(new Error(`登録に失敗しました: ${result.error}`));
@@ -45,7 +48,7 @@ function RegisterOverlayContents() {
     });
 
     taskRequest?.resolve();
-  }, [taskRequest, setConfig]);
+  }, [taskRequest, config.uploaderUrlBase, setConfig]);
 
   const onRejectClick = useCallback(() => {
     taskRequest?.reject(new Error("アップローダーの規約に同意していません"));
