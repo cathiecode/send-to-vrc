@@ -55,7 +55,14 @@ function RegisterOverlayContents() {
   }, [taskRequest]);
 
   if (tos?.status === "error") {
-    return "利用規約の読み込みに失敗しました。";
+    return (
+      <div>
+        <div>利用規約の読み込みに失敗しました。</div>
+        <div>
+          <Button onClick={onRejectClick}>戻る</Button>
+        </div>
+      </div>
+    );
   }
 
   if (!tos) {
