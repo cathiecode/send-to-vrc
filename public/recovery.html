@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recovery</title>
+  </head>
+
+  <body>
+    <h1>リカバリーモード</h1>
+    <p>
+      アプリケーションが正常に動作していない場合は以下の設定を試すことができます。
+    </p>
+    <button onClick="RECOVERY.resetConfig()">設定をリセット</button>
+    <button onClick="RECOVERY.outputConfig()">設定を表示</button>
+    <a href="/"><button>アプリケーションに戻る</button></a>
+    <pre style="background-color: #eee; padding: 1em" id="log"></pre>
+    <script src="/recovery.js"></script>
+  </body>
+</html>

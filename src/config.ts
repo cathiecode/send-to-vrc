@@ -1,10 +1,12 @@
 import { commands } from "./bindings.gen";
 import z from "zod";
+import DEFAULT_CONFIG_JSON_URL from "../public/default_config.json?url";
 
 const ConfigV1Schema = z.object({
   version: z.literal(1),
   copyOnUpload: z.boolean().default(true),
   uploaderApiKey: z.string().optional(),
+  uploaderUrlBase: z.string(),
 });
 
 const VersionedConfigSchema = z.union([ConfigV1Schema]);
@@ -12,11 +14,6 @@ const VersionedConfigSchema = z.union([ConfigV1Schema]);
 const LatestConfigSchema = ConfigV1Schema;
 
 export type Config = z.infer<typeof LatestConfigSchema>;
-
-const DEFAULT_CONFIG: Config = {
-  version: 1,
-  copyOnUpload: true,
-};
 
 export async function migrateConfig(
   oldConfig: z.infer<typeof VersionedConfigSchema>,
@@ -30,7 +27,9 @@ export async function loadConfig(): Promise<Config> {
 
   if (loadConfigFileResult.status === "error") {
     if (loadConfigFileResult.error.type === "ConfigExistance") {
-      return DEFAULT_CONFIG;
+      return LatestConfigSchema.parse(
+        await fetch(DEFAULT_CONFIG_JSON_URL).then((res) => res.json()),
+      );
     }
     throw new Error(
       `設定ファイルの読み込みに失敗しました: ${loadConfigFileResult.error}`,

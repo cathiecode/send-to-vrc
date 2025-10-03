@@ -4,6 +4,8 @@ import App from "./App";
 import "./index.scss";
 import { parseArgs } from "./args";
 import { commands } from "./bindings.gen";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorComponent from "./ErrorComponent";
 
 async function main() {
   const args = await commands.getArgs();
@@ -23,7 +25,9 @@ async function main() {
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
       <Suspense fallback={null}>
-        <App />
+        <ErrorBoundary FallbackComponent={ErrorComponent}>
+          <App />
+        </ErrorBoundary>
       </Suspense>
     </React.StrictMode>,
   );

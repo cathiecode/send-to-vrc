@@ -36,6 +36,7 @@
     "jotai-tanstack-query": "^0.11.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-error-boundary": "^6.0.0",
     "react-icons": "^5.5.0",
     "swr": "^2.3.6",
     "zod": "^4.1.11"

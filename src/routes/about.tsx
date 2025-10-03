@@ -91,6 +91,10 @@ function AboutPage() {
         キャサリン Catherine及び本ソフトウェアの開発者はSend to
         VRCの使用に起因または関連するいかなる損害についても責任を負いません。
       </p>
+      <h2>その他</h2>
+      <a href="/recovery.html">
+        <Button variant="secondary">リカバリページを開く</Button>
+      </a>
     </Container>
   );
 }
