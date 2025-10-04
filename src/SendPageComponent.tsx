@@ -6,10 +6,11 @@ import { SendState } from "./atoms";
 import useSWR from "swr";
 import { extractImageProps } from "./extractImageProps";
 import ButtonCard from "./ButtonCard";
-import { TbClipboard, TbMovie, TbPhotoUp } from "react-icons/tb";
+import { TbClipboard, TbMovie, TbPhotoUp, TbPrinter } from "react-icons/tb";
 import Card, { CardAction, CardDescription, CardIcon, CardTitle } from "./Card";
 import LimitedText from "./LimitedText";
 import { useCallback, useId } from "react";
+import SendToVRChatPrintMode from "./SendToVRChatPrintMode";
 
 type SendPageComponentProps = {
   sendState: SendState | undefined;
@@ -17,9 +18,11 @@ type SendPageComponentProps = {
   imageFileSrc: string | undefined;
   imageValidity: "valid" | "invalid" | "pending";
   shouldCopyAfterUpload: boolean;
+  vrchatPrint: boolean;
   onFilePicked: (filePath: string | undefined) => void;
   onSendToVideoPlayerClicked: () => void;
   onSendToImageViewerClicked: () => void;
+  onSendToVrchatPrintClicked: () => void;
   onShouldCopyAfterUploadChanged?: (v: boolean) => void;
 };
 
@@ -29,9 +32,11 @@ export default function SendPageComponent(props: SendPageComponentProps) {
     pickedFilePath,
     imageFileSrc,
     imageValidity,
+    vrchatPrint,
     onFilePicked,
     onSendToImageViewerClicked,
     onSendToVideoPlayerClicked,
+    onSendToVrchatPrintClicked,
   } = props;
   const isFilePicking = sendState?.mode === undefined;
 
@@ -115,6 +120,8 @@ export default function SendPageComponent(props: SendPageComponentProps) {
                 return <SendToVideoPlayerMode state={sendState.state} />;
               case "image_viewer":
                 return <SendToImageViewerMode state={sendState.state} />;
+              case "vrchat_print":
+                return <SendToVRChatPrintMode state={sendState.state} />;
               default:
                 return null;
             }
@@ -184,6 +191,15 @@ export default function SendPageComponent(props: SendPageComponentProps) {
             onClick={onSendToImageViewerClicked}
             disabled={imageValidity !== "valid"}
           />
+          {vrchatPrint ? (
+            <ButtonCard
+              icon={<TbPrinter />}
+              title="VRChat Printで印刷する"
+              description="VRChat Printにアップロードする"
+              onClick={onSendToVrchatPrintClicked}
+              disabled={imageValidity !== "valid"}
+            />
+          ) : null}
         </div>
       </div>
     </div>

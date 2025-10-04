@@ -9,6 +9,8 @@ import {
   setFileToSendAtom,
   fileToSendAtom,
   shouldCopyAfterUploadAtom,
+  vrchatPrintFeatureFlagAtom,
+  sendImageToVRChatPrintAtom,
 } from "@/atoms";
 import { convertFileSrc } from "@tauri-apps/api/core";
 
@@ -25,6 +27,7 @@ function SendPage() {
 
   const sendImageToVideoPlayer = useSetAtom(sendImageToVideoPlayerAtom);
   const sendImageToImageViewer = useSetAtom(sendImageToImageViewerAtom);
+  const sendImageToVRChatPrint = useSetAtom(sendImageToVRChatPrintAtom);
 
   const imageValidity = useImageValidity(pickedFilePath);
 
@@ -44,6 +47,15 @@ function SendPage() {
     }
 
     sendImageToImageViewer(pickedFilePath);
+  }, [pickedFilePath]);
+
+  const onSendToVrchatPrintClicked = useCallback(() => {
+    if (!pickedFilePath) {
+      alert("ファイルが選択されていません");
+      return;
+    }
+
+    sendImageToVRChatPrint(pickedFilePath);
   }, [pickedFilePath]);
 
   const setFileToSend = useSetAtom(setFileToSendAtom);
@@ -66,6 +78,8 @@ function SendPage() {
     shouldCopyAfterUploadAtom,
   );
 
+  const vrchatPrintFeatureFlag = useAtomValue(vrchatPrintFeatureFlagAtom);
+
   return (
     <SendPageComponent
       sendState={sendState}
@@ -73,9 +87,11 @@ function SendPage() {
       imageFileSrc={imageFileSrc}
       imageValidity={imageValidity}
       shouldCopyAfterUpload={shouldCopyAfterUpload}
+      vrchatPrint={vrchatPrintFeatureFlag}
       onFilePicked={onFilePicked}
       onSendToImageViewerClicked={onSendToImageViewerClicked}
       onSendToVideoPlayerClicked={onSendToVideoPlayerClicked}
+      onSendToVrchatPrintClicked={onSendToVrchatPrintClicked}
       onShouldCopyAfterUploadChanged={setShouldCopyAfterUpload}
     />
   );

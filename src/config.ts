@@ -7,6 +7,8 @@ const ConfigV1Schema = z.object({
   copyOnUpload: z.boolean().default(true),
   uploaderApiKey: z.string().optional(),
   uploaderUrlBase: z.string(),
+  feature: z.record(z.string(), z.boolean()),
+  vrchatApiKey: z.string().or(z.null()).optional(),
 });
 
 const VersionedConfigSchema = z.union([ConfigV1Schema]);

@@ -1,5 +1,9 @@
 {
   "version": 1,
   "copyOnUpload": true,
-  "uploaderUrlBase": "https://s2v-upload.superneko.net"
+  "uploaderUrlBase": "https://s2v-upload.superneko.net",
+  "feature": {
+    "vrchat-print": false
+  },
+  "vrchatApiKey": null
 }

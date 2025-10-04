@@ -50,6 +50,18 @@ export type VideoPlayerSendState =
       message: string;
     };
 
+export type VRChatPrintSendState =
+  | {
+      status: "uploading";
+    }
+  | {
+      status: "done";
+    }
+  | {
+      status: "error";
+      message: string;
+    };
+
 export type SendState =
   | {
       mode: "image_viewer";
@@ -58,6 +70,10 @@ export type SendState =
   | {
       mode: "video_player";
       state: VideoPlayerSendState;
+    }
+  | {
+      mode: "vrchat_print";
+      state: VRChatPrintSendState;
     };
 
 export const sendStateAtom = atom<SendState | undefined>();
@@ -228,6 +244,54 @@ export const sendImageToImageViewerAtom = atom(
   },
 );
 
+export const sendImageToVRChatPrintAtom = atom(
+  null,
+  async (get, set, filePath: string) => {
+    set(sendStateAtom, {
+      mode: "vrchat_print",
+      state: { status: "uploading" },
+    });
+
+    try {
+      for (let i = 0; i < 3; i++) {
+        const config = await get(configAtom);
+        const vrchatApiKey = config.vrchatApiKey ?? undefined;
+
+        if (vrchatApiKey === undefined) {
+          throw new Error(
+            "VRChat APIキーが設定されていません。configのvrchatApiKeyに設定してください。",
+          );
+        }
+
+        const result = await commands.uploadImageToVrchatPrint(
+          filePath,
+          vrchatApiKey,
+        );
+
+        if (result.status === "error") {
+          throw new Error(`アップロードに失敗しました: ${result.error}`);
+        }
+
+        set(sendStateAtom, {
+          mode: "vrchat_print",
+          state: { status: "done" },
+        });
+
+        return;
+      }
+
+      throw new Error(
+        "アップロードに失敗しました: 不明な原因により失敗しました",
+      );
+    } catch (err) {
+      set(sendStateAtom, {
+        mode: "vrchat_print",
+        state: { status: "error", message: String(err) },
+      });
+    }
+  },
+);
+
 export const registerRequestAtom = createTaskAtom<void>();
 
 let configCache: Config | null = null;
@@ -256,6 +320,10 @@ export const configAtom = atom(
 
     set(configValueAtom);
   },
+);
+
+export const vrchatPrintFeatureFlagAtom = atom((get) =>
+  mapPromise(get(configAtom), (c) => c.feature?.["vrchat-print"] ?? false),
 );
 
 function mapPromise<T, U>(v: T | Promise<T>, map: (v: T) => U): U | Promise<U> {

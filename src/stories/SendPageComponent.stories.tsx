@@ -23,9 +23,11 @@ const defaultArgs = {
   imageFileSrc: undefined,
   imageValidity: "pending",
   shouldCopyAfterUpload: true,
+  vrchatPrint: false,
   onFilePicked: (_filePath: string | undefined) => {},
   onSendToVideoPlayerClicked: () => {},
   onSendToImageViewerClicked: () => {},
+  onSendToVrchatPrintClicked: () => {},
 } as const;
 
 export const Default: Story = {
