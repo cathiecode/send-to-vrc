@@ -5,12 +5,22 @@ import { css } from "@emotion/react";
 import { createFileRoute } from "@tanstack/react-router";
 import Container from "@/Container";
 import Logo from "@/assets/logo.png";
+import useSWR from "swr";
+import { getVersion } from "@tauri-apps/api/app";
 
 export const Route = createFileRoute("/about")({
   component: AboutPage,
 });
 
 function AboutPage() {
+  const { data: version } = useSWR(
+    "version",
+    async () => {
+      return await getVersion();
+    },
+    { suspense: true },
+  );
+
   return (
     <Container>
       <div
@@ -35,7 +45,7 @@ function AboutPage() {
           text-align: center;
         `}
       >
-        Send to VRC
+        Send to VRC {version}
       </h1>
       <div
         css={css`
