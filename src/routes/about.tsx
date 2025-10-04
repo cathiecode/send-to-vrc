@@ -84,7 +84,7 @@ function AboutPage() {
       <h2>サードパーティのライセンス</h2>
       <p>
         このソフトウェアは、様々なオープンソースソフトウェアにより構築されています。
-        詳細については、リソースフォルダのTHIRDPARTY.*ファイルをご覧ください。
+        詳細については、licensesフォルダのファイルをご覧ください。
         <div>
           <Button variant="secondary" onClick={openResourceDir}>
             <TbExternalLink /> リソースフォルダを開く

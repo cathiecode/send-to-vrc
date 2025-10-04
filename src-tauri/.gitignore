@@ -6,8 +6,8 @@
 # will have schema files for capabilities auto-completion
 /gen/schemas
 
-/resources/THIRDPARTY.frontend
-/resources/THIRDPARTY.backend
+/licenses/THIRDPARTY.frontend
+/licenses/THIRDPARTY.backend
 /resources/ffmpeg
 /resources/ffmpeg.exe
 /resources/ffmpeg-source-code.zip
