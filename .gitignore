@@ -28,3 +28,6 @@ storybook-static
 
 src/routeTree.gen.ts
 .tanstack
+
+/bundle
+/SendToVRC_*.zip
