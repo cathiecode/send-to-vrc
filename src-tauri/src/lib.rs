@@ -467,6 +467,9 @@ mod test {
     }
 }
 
+// Windows-specific: to prevent opening a console window
+const DETACHED_PROCESS: u32 = 0x00000008;
+
 async fn encode_image_to_video(
     ffmpeg_path: &str,
     image_file_path: &str,
@@ -491,6 +494,7 @@ async fn encode_image_to_video(
             "yuv420p",
             output_video_path,
         ])
+        .creation_flags(DETACHED_PROCESS)
         .status()
         .await
         .map_err(AppError::from_error_with_message(
