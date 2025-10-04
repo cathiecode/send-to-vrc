@@ -46,4 +46,13 @@ let RECOVERY = {
   },
 };
 
+document.querySelectorAll("[data-onclick]").forEach((el) => {
+  const funcName = el.getAttribute("data-onclick");
+  if (funcName && typeof RECOVERY[funcName] === "function") {
+    el.addEventListener("click", () => {
+      RECOVERY[funcName]();
+    });
+  }
+});
+
 RECOVERY.log("Recovery mode initialized.");
