@@ -40,6 +40,31 @@ let RECOVERY = {
       return;
     }
   },
+  async overwriteConfig() {
+    const textarea = document.getElementById("config");
+    if (!(textarea instanceof HTMLTextAreaElement)) {
+      this.log("Failed to find config textarea");
+      return;
+    }
+
+    const contents = textarea.value;
+    if (!contents) {
+      this.log("Config textarea is empty; not overwriting");
+      return;
+    }
+
+    this.log("Overwriting config with contents:");
+    this.log(contents);
+
+    try {
+      await window.__TAURI__.core.invoke("save_config_file", { contents });
+    } catch (e) {
+      this.log("Failed to save config file: " + e);
+      return;
+    }
+
+    this.log("Config overwritten; please restart the application.");
+  },
   log(message) {
     console.log(message);
     document.getElementById("log").innerText += message + "\n";

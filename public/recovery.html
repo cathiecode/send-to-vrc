@@ -14,6 +14,13 @@
     <button data-onclick="resetConfig">設定をリセット</button>
     <button data-onclick="outputConfig">設定を表示</button>
     <a href="/"><button>アプリケーションに戻る</button></a>
+    <details>
+      <summary>設定を直接編集</summary>
+      <textarea name="config" id="config"></textarea>
+      <div>
+        <button data-onclick="overwriteConfig">設定を上書き</button>
+      </div>
+    </details>
     <pre style="background-color: #eee; padding: 1em" id="log"></pre>
     <script src="/recovery.js"></script>
   </body>
