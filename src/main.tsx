@@ -6,6 +6,7 @@ import { parseArgs } from "./args";
 import { commands } from "./bindings.gen";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorComponent from "./ErrorComponent";
+import RewriteLangTag from "./RewriteLangTag";
 
 async function main() {
   const args = await commands.getArgs();
@@ -27,6 +28,7 @@ async function main() {
       <Suspense fallback={null}>
         <ErrorBoundary FallbackComponent={ErrorComponent}>
           <App />
+          <RewriteLangTag />
         </ErrorBoundary>
       </Suspense>
     </React.StrictMode>,

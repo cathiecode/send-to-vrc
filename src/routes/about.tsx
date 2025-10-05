@@ -7,6 +7,8 @@ import Container from "@/Container";
 import Logo from "@/assets/logo.png";
 import useSWR from "swr";
 import { getVersion } from "@tauri-apps/api/app";
+import { useLocalized } from "@/i18n";
+import { lfToBr } from "@/utils";
 
 export const Route = createFileRoute("/about")({
   component: AboutPage,
@@ -20,6 +22,8 @@ function AboutPage() {
     },
     { suspense: true },
   );
+
+  const localized = useLocalized();
 
   return (
     <Container>
@@ -60,16 +64,8 @@ function AboutPage() {
           GitHub
         </a>
       </div>
-      <p>
-        Send to
-        VRCは無料のオープンソースソフトウェアで、VRChatで画像を簡単に共有するためのツールです。
-        <br />
-        画像は、VRChatで表示できる形式に変換され、クラウドサービスにアップロードされます。
-        <br />
-        アップロードされた画像のURLをクリップボードにコピーし、VRChat内の動画プレイヤーや画像ビューアに貼り付けて表示できます。
-        <br />
-      </p>
-      <h2>製作者</h2>
+      <p>{lfToBr(localized("about.description"))}</p>
+      <h2>{localized("about.author")}</h2>
       <p>
         Catherine キャサリン (
         <a
@@ -81,29 +77,20 @@ function AboutPage() {
         </a>
         )
       </p>
-      <h2>サードパーティのライセンス</h2>
+      <h2>{localized("about.thirdparty-license")}</h2>
       <p>
-        このソフトウェアは、様々なオープンソースソフトウェアにより構築されています。
-        詳細については、licensesフォルダのファイルをご覧ください。
+        {localized("about.thirdparty-license.description")}
         <div>
           <Button variant="secondary" onClick={openResourceDir}>
-            <TbExternalLink /> リソースフォルダを開く
+            <TbExternalLink /> {localized("open-resource-folder")}
           </Button>
         </div>
       </p>
-      <h2>おことわり</h2>
-      <p>
-        Send To VRCはキャサリン
-        Catherineにより作成されたソフトウェアであり、VRChat
-        Inc.からの承認、認可、関与または推奨を受けるものではありません。VRChatはVRChat
-        Inc.の登録商標です。
-        <br />
-        キャサリン Catherine及び本ソフトウェアの開発者はSend to
-        VRCの使用に起因または関連するいかなる損害についても責任を負いません。
-      </p>
-      <h2>その他</h2>
+      <h2>{localized("about.notice")}</h2>
+      <p>{lfToBr(localized("about.notice.description"))}</p>
+      <h2>{localized("about.misc")}</h2>
       <a href="/recovery.html">
-        <Button variant="secondary">リカバリページを開く</Button>
+        <Button variant="secondary">{localized("open-recovery-page")}</Button>
       </a>
     </Container>
   );

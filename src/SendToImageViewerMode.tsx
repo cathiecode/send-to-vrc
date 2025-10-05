@@ -7,6 +7,7 @@ import LimitedText from "./LimitedText";
 import Button from "./Button";
 import { TbCopy } from "react-icons/tb";
 import useClipboard from "./useClipboard";
+import { useLocalized } from "./i18n";
 
 type SendToImageViewerMode = {
   state: ImageViewerSendState;
@@ -17,16 +18,18 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
 
   const progressMessage = useProgressMessage();
 
+  const localized = useLocalized();
+
   const displayProgressMessage = useMemo(() => {
     switch (progressMessage) {
       case "Starting":
-        return "処理が開始されました…";
+        return localized("send.send-to-image-viewer.started");
       case "Compressing":
-        return "画像を圧縮しています…";
+        return localized("send.send-to-image-viewer.compressing");
       case "Uploading":
-        return "画像をアップロードしています…";
+        return localized("send.send-to-image-viewer.uploading");
       default:
-        return "処理を開始しています…";
+        return localized("send.send-to-image-viewer.starting");
     }
   }, [progressMessage]);
 
@@ -60,9 +63,13 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
               <>
                 <StatusLineComponent
                   status="success"
-                  statusText="アップロードに成功しました。"
+                  statusText={localized("send.send-to-image-viewer.succeeded")}
                 />
-                <div>画像ビューアにURLを貼り付けてください。</div>
+                <div>
+                  {localized(
+                    "send.send-to-image-viewer.please-paste-url-to-image-viewer",
+                  )}
+                </div>
                 <div
                   css={css`
                     display: flex;
@@ -73,7 +80,7 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
                   <LimitedText width="15em">{state.url}</LimitedText>
                   <Button variant="secondary" onClick={onCopyClicked}>
                     {" "}
-                    <TbCopy /> コピー
+                    <TbCopy /> {localized("send.send-to-image-viewer.copy")}
                   </Button>
                 </div>
               </>
@@ -82,7 +89,7 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
             return (
               <StatusLineComponent
                 status="error"
-                statusText={`アップロードに失敗しました。(${state.message})`}
+                statusText={`${localized("send.send-to-image-viewer.failed")}(${state.message})`}
               />
             );
         }

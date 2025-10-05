@@ -6,6 +6,7 @@ import { css } from "@emotion/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import Logo from "@/assets/logo.png";
+import { useLocalized } from "@/i18n";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -21,6 +22,8 @@ function Index() {
   };
 
   const onFilePickClicked = useFilePickerDialog(onFilePicked);
+
+  const localized = useLocalized();
 
   return (
     <Container>
@@ -49,7 +52,7 @@ function Index() {
         </h1>
         <div>
           <Button onClick={onFilePickClicked}>
-            アップロードする画像ファイルを選択
+            {localized("send.select-file-for-upload")}
           </Button>
         </div>
         <div
@@ -58,7 +61,9 @@ function Index() {
           `}
         >
           <Link to="/about">
-            <Button variant="secondary">このソフトウェアについて</Button>
+            <Button variant="secondary">
+              {localized("about.open-about-page")}
+            </Button>
           </Link>
         </div>
       </div>

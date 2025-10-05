@@ -9,6 +9,7 @@
     "dialog:default",
     "log:default",
     "clipboard-manager:default",
-    "clipboard-manager:allow-write-text"
+    "clipboard-manager:allow-write-text",
+    "os:allow-locale"
   ]
 }

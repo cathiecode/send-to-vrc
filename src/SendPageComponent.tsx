@@ -11,6 +11,7 @@ import Card, { CardAction, CardDescription, CardIcon, CardTitle } from "./Card";
 import LimitedText from "./LimitedText";
 import { useCallback, useId } from "react";
 import SendToVRChatPrintMode from "./SendToVRChatPrintMode";
+import { useLocalized } from "./i18n";
 
 type SendPageComponentProps = {
   sendState: SendState | undefined;
@@ -55,6 +56,8 @@ export default function SendPageComponent(props: SendPageComponentProps) {
     },
     [],
   );
+
+  const localized = useLocalized();
 
   return (
     <div
@@ -152,10 +155,10 @@ export default function SendPageComponent(props: SendPageComponentProps) {
             <CardIcon>
               <TbClipboard />
             </CardIcon>
-            <CardTitle>自動でクリップボードにコピー</CardTitle>
+            <CardTitle>{localized("send.copy-on-upload")}</CardTitle>
             <CardDescription>
               <LimitedText>
-                アップロード完了時にURLをクリップボードにコピーします
+                {localized("send.copy-on-upload.description")}
               </LimitedText>
             </CardDescription>
             <CardAction>
@@ -179,23 +182,23 @@ export default function SendPageComponent(props: SendPageComponentProps) {
           </Card>
           <ButtonCard
             icon={<TbMovie />}
-            title="動画プレイヤーに映す"
-            description="クラウドサービスに動画としてアップロードする"
+            title={localized("send.send-to-video-player")}
+            description={localized("send.send-to-video-player.description")}
             onClick={onSendToVideoPlayerClicked}
             disabled={imageValidity !== "valid"}
           />
           <ButtonCard
             icon={<TbPhotoUp />}
-            title="静止画ビューアに映す"
-            description="クラウドサービスに静止画としてアップロードする"
+            title={localized("send.send-to-image-viewer")}
+            description={localized("send.send-to-image-viewer.description")}
             onClick={onSendToImageViewerClicked}
             disabled={imageValidity !== "valid"}
           />
           {vrchatPrint ? (
             <ButtonCard
               icon={<TbPrinter />}
-              title="VRChat Printで印刷する"
-              description="VRChat Printにアップロードする"
+              title={localized("send.print-to-vrchat-print")}
+              description={localized("send.print-to-vrchat-print.description")}
               onClick={onSendToVrchatPrintClicked}
               disabled={imageValidity !== "valid"}
             />
