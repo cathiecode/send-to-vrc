@@ -141,7 +141,9 @@ export const sendImageToVideoPlayerAtom = atom(
             continue; // Retry
           }
 
-          throw new Error(`アップロードに失敗しました: ${result.error}`);
+          throw new Error(
+            `アップロードに失敗しました: ${result.error.type} ${result.error.message}`,
+          );
         }
 
         const url = result.data;
@@ -215,7 +217,9 @@ export const sendImageToImageViewerAtom = atom(
             continue; // Retry
           }
 
-          throw new Error(`アップロードに失敗しました: ${result.error}`);
+          throw new Error(
+            `アップロードに失敗しました: ${result.error.type} ${result.error.message}`,
+          );
         }
 
         const url = result.data;
