@@ -229,7 +229,18 @@ async fn upload_image_to_vrchat_print(
         return Err(AppError::Unknown("File does not exist".to_string()));
     }
 
-    send_file_to_print(path, vrchat_api_key).await
+    let letterboxed_image_path = temp_file_path("letterboxed_image.png");
+
+    let (width, height) = (1280, 720);
+
+    resize_image_letterboxed(
+        file_path,
+        &letterboxed_image_path.to_string_lossy(),
+        width,
+        height,
+    )?;
+
+    send_file_to_print(&letterboxed_image_path, vrchat_api_key).await
 }
 
 #[tauri::command]
