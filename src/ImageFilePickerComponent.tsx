@@ -3,6 +3,7 @@ import { css } from "storybook/internal/theming";
 import useSWR from "swr";
 import { extractImageProps } from "./extractImageProps";
 import { TbPhotoQuestion } from "react-icons/tb";
+import { useLocalized } from "./i18n";
 
 type ImageFilePickerComponentProps = {
   imageSrc?: string;
@@ -19,6 +20,8 @@ export default function ImageFilePickerComponent(
 ) {
   const { imageSrc, readonly, height, pickedFileValidity, onOpenClicked } =
     props;
+
+  const localized = useLocalized();
 
   const { data: imageProps } = useSWR(
     () => imageSrc && [imageSrc, "imageProps"],
@@ -137,9 +140,7 @@ export default function ImageFilePickerComponent(
               `}
             />
             <br />
-            指定されたファイルを読み込めませんでした。
-            <br />
-            他の画像ファイルを選択してください。
+            {localized("send.failed-to-load")}
           </div>
         )}
 
@@ -165,7 +166,7 @@ export default function ImageFilePickerComponent(
             `}
             onClick={onOpenClicked}
           >
-            画像ファイルを選択
+            {localized("send.select-file-for-upload")}
           </button>
         )}
       </div>

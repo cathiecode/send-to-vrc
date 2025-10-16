@@ -8,10 +8,12 @@ import { commands } from "@/bindings.gen";
 import StatusLineComponent from "./StatusLineComponent";
 import { useAtom } from "jotai";
 import Overlay from "./Overlay";
+import { useLocalized } from "@/i18n";
 
 function RegisterOverlayContents() {
   const taskRequest = useTaskRequestAtom(registerRequestAtom);
   const [config, setConfig] = useAtom(configAtom);
+  const localized = useLocalized();
 
   const { data: tos } = useSWR([config.uploaderUrlBase, "tos"], async () => {
     return await commands.getTosAndVersion(config.uploaderUrlBase);
@@ -38,7 +40,9 @@ function RegisterOverlayContents() {
     );
 
     if (result.status === "error") {
-      taskRequest?.reject(new Error(`登録に失敗しました: ${result.error}`));
+      taskRequest?.reject(
+        new Error(`${localized("send.tos.error.failed")}: ${result.error}`),
+      );
       return;
     }
 
@@ -52,13 +56,13 @@ function RegisterOverlayContents() {
   }, [taskRequest, config.uploaderUrlBase, setConfig]);
 
   const onRejectClick = useCallback(() => {
-    taskRequest?.reject(new Error("アップローダーの規約に同意していません"));
-  }, [taskRequest]);
+    taskRequest?.reject(new Error(localized("send.tos.error.denied")));
+  }, [taskRequest, localized]);
 
   if (tos?.status === "error") {
     return (
       <div>
-        <div>利用規約の読み込みに失敗しました。</div>
+        <div>{localized("send.tos.failed-to-load")}</div>
         <div>
           <Button onClick={onRejectClick}>戻る</Button>
         </div>
@@ -80,7 +84,7 @@ function RegisterOverlayContents() {
       >
         <StatusLineComponent
           status="pending"
-          statusText="利用規約を読み込んでいます"
+          statusText={localized("send.tos.loading")}
         />
       </div>
     );
@@ -93,7 +97,7 @@ function RegisterOverlayContents() {
           margin-bottom: 2em;
         `}
       >
-        アップローダーが以下の規約に同意することを要求しています。同意しますか？
+        {localized("send.tos.description")}
       </div>
       <div
         css={css`
@@ -115,9 +119,9 @@ function RegisterOverlayContents() {
         `}
       >
         <Button variant="secondary" onClick={onRejectClick}>
-          同意しない
+          {localized("send.tos.deny")}
         </Button>
-        <Button onClick={onAcceptClick}>同意する</Button>
+        <Button onClick={onAcceptClick}>{localized("send.tos.accept")}</Button>
       </div>
     </div>
   );

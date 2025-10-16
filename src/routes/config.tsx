@@ -3,6 +3,7 @@ import Container from "@/Container";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAtom } from "jotai";
 import { FormEvent, useCallback, useState } from "react";
+import { useLocalized } from "@/i18n";
 
 export const Route = createFileRoute("/config")({
   component: RouteComponent,
@@ -12,6 +13,7 @@ function RouteComponent() {
   const [config, setConfig] = useAtom(configAtom);
 
   const [configDraft, setConfigDraft] = useState(config);
+  const localized = useLocalized();
 
   const onSubmit = useCallback(
     async (ev: FormEvent<HTMLFormElement>) => {
@@ -25,7 +27,7 @@ function RouteComponent() {
   return (
     <Container>
       <form onSubmit={onSubmit}>
-        APIキー
+        {localized("config.api-key")}
         <input
           type="text"
           value={configDraft.uploaderApiKey}

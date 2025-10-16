@@ -3,6 +3,7 @@ import { VRChatPrintSendState } from "./atoms";
 import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
 import { useMemo } from "react";
+import { useLocalized } from "./i18n";
 
 type SendToVRChatPrintModeProps = {
   state: VRChatPrintSendState;
@@ -14,19 +15,20 @@ export default function SendToVRChatPrintMode(
   const { state } = props;
 
   const progressMessage = useProgressMessage();
+  const localized = useLocalized();
 
   const displayProgressMessage = useMemo(() => {
     switch (progressMessage) {
       case "Starting":
-        return "処理が開始されました…";
+        return localized("send.print-to-vrchat-print.started");
       case "Compressing":
-        return "画像を圧縮しています…";
+        return localized("send.print-to-vrchat-print.compressing");
       case "Uploading":
-        return "画像をアップロードしています…";
+        return localized("send.print-to-vrchat-print.uploading");
       default:
-        return "処理を開始しています…";
+        return localized("send.print-to-vrchat-print.starting");
     }
-  }, [progressMessage]);
+  }, [progressMessage, localized]);
 
   return (
     <div
@@ -51,16 +53,18 @@ export default function SendToVRChatPrintMode(
               <>
                 <StatusLineComponent
                   status="success"
-                  statusText="アップロードに成功しました。"
+                  statusText={localized("send.print-to-vrchat-print.succeeded")}
                 />
-                <div>Print機能を使用してシェアしてください。</div>
+                <div>
+                  {localized("send.print-to-vrchat-print.share-instruction")}
+                </div>
               </>
             );
           case "error":
             return (
               <StatusLineComponent
                 status="error"
-                statusText={`アップロードに失敗しました。(${state.message})`}
+                statusText={`${localized("send.print-to-vrchat-print.failed")}(${state.message})`}
               />
             );
         }

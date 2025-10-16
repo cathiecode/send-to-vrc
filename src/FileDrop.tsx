@@ -4,9 +4,11 @@ import { useCallback } from "react";
 import { TbUpload } from "react-icons/tb";
 import { useSetAtom } from "jotai";
 import { setFileToSendAtom } from "./atoms";
+import { useLocalized } from "./i18n";
 
 export default function FileDrop() {
   const setFileToSend = useSetAtom(setFileToSendAtom);
+  const localized = useLocalized();
 
   const onDrop = useCallback((filePath: string) => {
     console.log("File dropped:", filePath);
@@ -44,7 +46,7 @@ export default function FileDrop() {
       >
         <TbUpload />
       </div>
-      ファイルをアップロード
+      {localized("send.drop.description")}
     </div>
   );
 }

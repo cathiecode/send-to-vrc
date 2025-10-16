@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { useImageValidity } from "@/useImageValidity";
+import { useLocalized } from "@/i18n";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   sendImageToVideoPlayerAtom,
@@ -25,6 +26,8 @@ function SendPage() {
 
   const sendState = useAtomValue(sendStateAtom);
 
+  const localized = useLocalized();
+
   const sendImageToVideoPlayer = useSetAtom(sendImageToVideoPlayerAtom);
   const sendImageToImageViewer = useSetAtom(sendImageToImageViewerAtom);
   const sendImageToVRChatPrint = useSetAtom(sendImageToVRChatPrintAtom);
@@ -33,30 +36,30 @@ function SendPage() {
 
   const onSendToVideoPlayerClicked = useCallback(() => {
     if (!pickedFilePath) {
-      alert("ファイルが選択されていません");
+      alert(localized("send.no-file-selected"));
       return;
     }
 
     sendImageToVideoPlayer(pickedFilePath);
-  }, [pickedFilePath]);
+  }, [pickedFilePath, localized, sendImageToVideoPlayer]);
 
   const onSendToImageViewerClicked = useCallback(() => {
     if (!pickedFilePath) {
-      alert("ファイルが選択されていません");
+      alert(localized("send.no-file-selected"));
       return;
     }
 
     sendImageToImageViewer(pickedFilePath);
-  }, [pickedFilePath]);
+  }, [pickedFilePath, localized, sendImageToImageViewer]);
 
   const onSendToVrchatPrintClicked = useCallback(() => {
     if (!pickedFilePath) {
-      alert("ファイルが選択されていません");
+      alert(localized("send.no-file-selected"));
       return;
     }
 
     sendImageToVRChatPrint(pickedFilePath);
-  }, [pickedFilePath]);
+  }, [pickedFilePath, localized, sendImageToVRChatPrint]);
 
   const setFileToSend = useSetAtom(setFileToSendAtom);
 

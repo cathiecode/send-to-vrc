@@ -273,7 +273,9 @@ export const sendImageToVRChatPrintAtom = atom(
         );
 
         if (result.status === "error") {
-          throw new Error(`アップロードに失敗しました: ${result.error}`);
+          throw new Error(
+            `アップロードに失敗しました: ${result.error.type} ${result.error.message}`,
+          );
         }
 
         set(sendStateAtom, {
