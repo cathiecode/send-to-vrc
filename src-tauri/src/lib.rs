@@ -1,11 +1,19 @@
-use std::path::PathBuf;
+use std::{
+    path::{Path, PathBuf},
+    thread::sleep,
+    time::Duration,
+};
 
 use image::GenericImageView;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tauri::{Emitter, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
+use tokio::sync::broadcast::{Receiver, Sender};
+use windows_capture::{
+    dxgi_duplication_api::DxgiDuplicationApi, encoder::ImageFormat, monitor::Monitor,
+};
 
 use crate::error::AppError;
 
@@ -59,6 +67,10 @@ pub fn run() {
             save_config_file,
             register_anonymously,
             get_tos_and_version,
+            get_system_locale,
+            start_capture,
+            stop_capture,
+            get_capture_url_command
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
@@ -779,4 +791,192 @@ fn config_file_path(handle: tauri::AppHandle) -> Result<PathBuf, AppError> {
         .join("config.json");
 
     Ok(config_path)
+}
+
+#[tauri::command]
+#[specta::specta]
+fn get_system_locale() -> String {
+    tauri_plugin_os::locale().unwrap_or("en".to_string())
+}
+
+static CAPTURE_THREAD_REQUEST_SENDER: std::sync::OnceLock<Sender<CaptureThreadRequest>> =
+    std::sync::OnceLock::new();
+
+#[derive(Debug, Clone, PartialEq)]
+enum CaptureThreadRequest {
+    Start,
+    Quit,
+}
+
+fn create_capture_thread(app_handle: AppHandle) -> Sender<CaptureThreadRequest> {
+    let (tx, rx) = tokio::sync::broadcast::channel::<CaptureThreadRequest>(10);
+
+    std::thread::spawn(move || {
+        capture_thread(app_handle, rx).unwrap();
+    });
+
+    tx
+}
+
+fn capture_thread(
+    app_handle: AppHandle,
+    mut request_receiver: Receiver<CaptureThreadRequest>,
+) -> Result<String, String> {
+    loop {
+        loop {
+            if request_receiver.blocking_recv().unwrap() == CaptureThreadRequest::Start {
+                break;
+            };
+        }
+
+        // capture every screens
+        let monitors = Monitor::enumerate().unwrap();
+        for (i, monitor) in monitors.iter().enumerate() {
+            // NOTE: 2nd argument must be matched with label of WebviewWindow
+            let path = get_capture_url(&app_handle, format!("capture_{}", i))
+                .map_err(|e| format!("Failed to get temp file path: {e}"))?;
+
+            match capture_monitor(&path, *monitor) {
+                Ok(_) => println!("Captured monitor {} to {:?}", i, path),
+                Err(e) => println!("Failed to capture monitor {}: {}", i, e),
+            }
+        }
+
+        println!("Finished capturing all monitors.");
+
+        let tauri_monitors = app_handle
+            .available_monitors()
+            .expect("Failed to get monitor");
+
+        for (i, monitor) in monitors.iter().enumerate() {
+            let tauri_monitor = tauri_monitors.get(i).ok_or("Not enough monitors")?;
+
+            println!(
+                "Monitor {}(Tauri monitor: {}): {:?}, size: {:?}, position: {:?}",
+                i,
+                monitor
+                    .name()
+                    .map_err(|e| format!("Monitor {} has no name: {:?}", i, e))?,
+                tauri_monitor.name(),
+                tauri_monitor.size(),
+                tauri_monitor.position()
+            );
+
+            let app_handle = app_handle.clone();
+
+            println!("Spawning window for monitor {}", i);
+
+            let x = tauri_monitor.work_area().position.x as f64;
+            let y = tauri_monitor.work_area().position.y as f64;
+
+            let request_receiver = request_receiver.resubscribe();
+
+            // FIXME: Does not need to spawn a new thread for each window?
+            std::thread::spawn(move || {
+                let window = tauri::webview::WebviewWindowBuilder::new(
+                    &app_handle,
+                    format!("capture_{}", i),
+                    tauri::WebviewUrl::App("/capture".into()),
+                )
+                .position(x, y)
+                .fullscreen(true)
+                .build()
+                .unwrap();
+
+                let mut request_receiver = request_receiver;
+
+                loop {
+                    if request_receiver.blocking_recv().unwrap() == CaptureThreadRequest::Quit {
+                        break;
+                    };
+                }
+
+                window.close().unwrap();
+            });
+        }
+
+        loop {
+            if request_receiver.blocking_recv().unwrap() == CaptureThreadRequest::Quit {
+                sleep(Duration::from_secs(1)); // wait for windows to close
+                break;
+            }
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+fn start_capture(app_handle: AppHandle) -> Result<(), String> {
+    let sender =
+        CAPTURE_THREAD_REQUEST_SENDER.get_or_init(|| create_capture_thread(app_handle.clone()));
+
+    sender
+        .send(CaptureThreadRequest::Start)
+        .map_err(|e| format!("Failed to send start request: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+fn stop_capture(app_handle: AppHandle) -> Result<(), String> {
+    let sender =
+        CAPTURE_THREAD_REQUEST_SENDER.get_or_init(|| create_capture_thread(app_handle.clone()));
+
+    sender
+        .send(CaptureThreadRequest::Quit)
+        .map_err(|e| format!("Failed to send quit request: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+fn get_capture_url_command(app_handle: AppHandle, monitor_id: String) -> Result<String, String> {
+    match get_capture_url(&app_handle, monitor_id) {
+        Ok(path) => Ok(path.to_string_lossy().to_string()),
+        Err(e) => Err(format!("Failed to get capture URL: {e}")),
+    }
+}
+
+fn get_capture_url(
+    app_handle: &AppHandle,
+    monitor_id: String,
+) -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let path_string = format!("screenshot_monitor_{}.png", monitor_id);
+    let path = app_handle
+        .path()
+        .temp_dir()
+        .map_err(|d| format!("Failed to get temp directory: {d}"))?
+        .join(Path::new(&path_string));
+
+    Ok(path)
+}
+
+fn capture_monitor(path: &Path, monitor: Monitor) -> Result<(), Box<dyn std::error::Error>> {
+    // Select a monitor (primary in this example)
+
+    // Create a duplication session for this monitor
+    let mut dup = DxgiDuplicationApi::new(monitor)?;
+
+    for i in 0..10 {
+        // Try to grab one frame within ~33ms (about 30 FPS budget)
+        let mut frame = dup.acquire_next_frame(1000)?;
+
+        // Map the GPU image into CPU memory and save a PNG
+        // Note: The API could send an empty frame especially
+        // in the first few calls, you can check this by seeing if
+        // frame.frame_info().LastPresentTime is zero.
+
+        if frame.frame_info().LastPresentTime == 0 {
+            println!("Frame {} is empty", i);
+            continue;
+        }
+
+        frame.save_as_image(path, ImageFormat::Png)?;
+
+        return Ok(());
+    }
+
+    Err("No frame captured".into())
 }

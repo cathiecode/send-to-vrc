@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAtom } from "jotai";
 import { FormEvent, useCallback, useState } from "react";
 import { useLocalized } from "@/i18n";
+import AppLayout from "@/AppContainer";
 
 export const Route = createFileRoute("/config")({
   component: RouteComponent,
@@ -25,18 +26,20 @@ function RouteComponent() {
   );
 
   return (
-    <Container>
-      <form onSubmit={onSubmit}>
-        {localized("config.api-key")}
-        <input
-          type="text"
-          value={configDraft.uploaderApiKey}
-          onChange={(ev) => {
-            const uploaderApiKey = ev.currentTarget.value;
-            setConfigDraft((c) => ({ ...c, uploaderApiKey }));
-          }}
-        />
-      </form>
-    </Container>
+    <AppLayout>
+      <Container>
+        <form onSubmit={onSubmit}>
+          {localized("config.api-key")}
+          <input
+            type="text"
+            value={configDraft.uploaderApiKey}
+            onChange={(ev) => {
+              const uploaderApiKey = ev.currentTarget.value;
+              setConfigDraft((c) => ({ ...c, uploaderApiKey }));
+            }}
+          />
+        </form>
+      </Container>
+    </AppLayout>
   );
 }

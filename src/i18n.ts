@@ -1,7 +1,7 @@
 import { atom, useAtomValue } from "jotai";
 import { atomWithCache } from "jotai-cache";
-import { locale } from "@tauri-apps/plugin-os";
 import { match } from "@formatjs/intl-localematcher";
+import { commands } from "./bindings.gen";
 
 async function availableLangs(): Promise<string[]> {
   const res = await fetch("/translation/available.json");
@@ -41,7 +41,7 @@ async function createLocalized(
 }
 
 export const systemLangAtom = atom(async () => {
-  const systemLang = await locale();
+  const systemLang = await commands.getSystemLocale();
 
   return systemLang;
 });

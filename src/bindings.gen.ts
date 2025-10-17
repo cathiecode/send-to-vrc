@@ -80,6 +80,33 @@ async getTosAndVersion(uploaderBaseUrl: string) : Promise<Result<Tos, AppError>>
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async getSystemLocale() : Promise<string> {
+    return await TAURI_INVOKE("get_system_locale");
+},
+async startCapture() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("start_capture") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async stopCapture() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("stop_capture") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getCaptureUrlCommand(monitorId: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_capture_url_command", { monitorId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 

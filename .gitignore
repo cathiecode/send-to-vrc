@@ -31,3 +31,5 @@ src/routeTree.gen.ts
 
 /bundle
 /SendToVRC_*.zip
+
+/target

@@ -16,6 +16,7 @@ import {
 import { convertFileSrc } from "@tauri-apps/api/core";
 
 import SendPageComponent from "@/SendPageComponent";
+import AppLayout from "@/AppContainer";
 
 export const Route = createFileRoute("/send")({
   component: SendPage,
@@ -84,18 +85,20 @@ function SendPage() {
   const vrchatPrintFeatureFlag = useAtomValue(vrchatPrintFeatureFlagAtom);
 
   return (
-    <SendPageComponent
-      sendState={sendState}
-      pickedFilePath={pickedFilePath}
-      imageFileSrc={imageFileSrc}
-      imageValidity={imageValidity}
-      shouldCopyAfterUpload={shouldCopyAfterUpload}
-      vrchatPrint={vrchatPrintFeatureFlag}
-      onFilePicked={onFilePicked}
-      onSendToImageViewerClicked={onSendToImageViewerClicked}
-      onSendToVideoPlayerClicked={onSendToVideoPlayerClicked}
-      onSendToVrchatPrintClicked={onSendToVrchatPrintClicked}
-      onShouldCopyAfterUploadChanged={setShouldCopyAfterUpload}
-    />
+    <AppLayout>
+      <SendPageComponent
+        sendState={sendState}
+        pickedFilePath={pickedFilePath}
+        imageFileSrc={imageFileSrc}
+        imageValidity={imageValidity}
+        shouldCopyAfterUpload={shouldCopyAfterUpload}
+        vrchatPrint={vrchatPrintFeatureFlag}
+        onFilePicked={onFilePicked}
+        onSendToImageViewerClicked={onSendToImageViewerClicked}
+        onSendToVideoPlayerClicked={onSendToVideoPlayerClicked}
+        onSendToVrchatPrintClicked={onSendToVrchatPrintClicked}
+        onShouldCopyAfterUploadChanged={setShouldCopyAfterUpload}
+      />
+    </AppLayout>
   );
 }
