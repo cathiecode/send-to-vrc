@@ -901,7 +901,6 @@ fn capture_thread(
                     tauri_monitor.position().x as f64,
                     tauri_monitor.position().y as f64,
                 )
-                .always_on_top(true)
                 .build()
                 .unwrap();
 
