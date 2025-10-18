@@ -861,7 +861,7 @@ fn capture_thread(
             .expect("Failed to get monitor");
 
         for (i, monitor) in monitors.iter().enumerate() {
-            let tauri_monitor = tauri_monitors.get(i).ok_or("Not enough monitors")?;
+            let tauri_monitor = tauri_monitors.get(i).ok_or("Not enough monitors")?.clone();
 
             println!(
                 "Monitor {}(Tauri monitor: {}): {:?}, size: {:?}, position: {:?}",
@@ -878,8 +878,9 @@ fn capture_thread(
 
             println!("Spawning window for monitor {}", i);
 
-            let x = tauri_monitor.work_area().position.x as f64;
-            let y = tauri_monitor.work_area().position.y as f64;
+            // NOTE: We add 10 pixel offset to avoid invalid monitor
+            /*let x = tauri_monitor.work_area().position.x as f64 + 10.0;
+            let y = tauri_monitor.work_area().position.y as f64 + 10.0;*/
 
             let request_receiver = request_receiver.resubscribe();
 
@@ -890,10 +891,24 @@ fn capture_thread(
                     format!("capture_{}", i),
                     tauri::WebviewUrl::App("/capture/".into()),
                 )
-                .position(x, y)
-                .fullscreen(true)
+                .decorations(false)
+                .shadow(false)
+                .inner_size(
+                    tauri_monitor.size().width as f64,
+                    tauri_monitor.size().height as f64,
+                )
+                .position(
+                    tauri_monitor.position().x as f64,
+                    tauri_monitor.position().y as f64,
+                )
+                .always_on_top(true)
                 .build()
                 .unwrap();
+
+                // NOTE: Somehow we need to set position after the window creation to make it work correctly
+                window
+                    .set_position(*tauri_monitor.position())
+                    .unwrap_or_else(|e| println!("Failed to set position for monitor: {:?}", e));
 
                 let mut request_receiver = request_receiver;
 
