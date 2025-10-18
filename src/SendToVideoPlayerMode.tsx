@@ -8,6 +8,7 @@ import { TbCopy } from "react-icons/tb";
 import LimitedText from "./LimitedText";
 import useClipboard from "./useClipboard";
 import { useLocalized } from "./i18n";
+import router from "./router";
 
 type SendToVideoPlayerModeProps = {
   state: VideoPlayerSendState;
@@ -85,6 +86,17 @@ export default function SendToVideoPlayerMode(
                     <TbCopy /> {localized("send.send-to-video-player.copy")}
                   </Button>
                 </div>
+                <Button
+                  variant="primary"
+                  css={css`
+                    margin-top: 0.5em;
+                  `}
+                  onClick={() => {
+                    router.navigate({ href: "/", replace: true });
+                  }}
+                >
+                  {localized("send.back-to-home")}
+                </Button>
               </>
             );
           case "error":

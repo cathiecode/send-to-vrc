@@ -101,7 +101,7 @@ export default function SendPageComponent(props: SendPageComponentProps) {
               margin-top 1s 0s,
               height 1s 0s;
             margin-top: 2em;
-            height: 6em;
+            height: 9em;
             ${isFilePicking
               ? "margin-top: 0em; height: 0em; opacity: 0; user-select: none; pointer-events: none;"
               : null}

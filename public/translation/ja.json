@@ -53,5 +53,6 @@
   "send.print-to-vrchat-print.failed": "アップロードに失敗しました。",
   "config.api-key": "APIキー",
   "send.print-to-vrchat-print.vrchat-api-key-missing": "VRChat APIキーが設定されていません。configのvrchatApiKeyに設定してください。",
-  "capture.start": "画面をキャプチャ"
+  "capture.start": "画面をキャプチャ",
+  "send.back-to-home": "ホームに戻る"
 }

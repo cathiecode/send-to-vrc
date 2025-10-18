@@ -4,6 +4,8 @@ import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
 import { useMemo } from "react";
 import { useLocalized } from "./i18n";
+import Button from "./Button";
+import router from "./router";
 
 type SendToVRChatPrintModeProps = {
   state: VRChatPrintSendState;
@@ -58,6 +60,17 @@ export default function SendToVRChatPrintMode(
                 <div>
                   {localized("send.print-to-vrchat-print.share-instruction")}
                 </div>
+                <Button
+                  variant="primary"
+                  css={css`
+                    margin-top: 0.5em;
+                  `}
+                  onClick={() => {
+                    router.navigate({ href: "/", replace: true });
+                  }}
+                >
+                  {localized("send.back-to-home")}
+                </Button>
               </>
             );
           case "error":

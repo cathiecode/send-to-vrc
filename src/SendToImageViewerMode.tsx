@@ -8,6 +8,7 @@ import Button from "./Button";
 import { TbCopy } from "react-icons/tb";
 import useClipboard from "./useClipboard";
 import { useLocalized } from "./i18n";
+import router from "./router";
 
 type SendToImageViewerMode = {
   state: ImageViewerSendState;
@@ -83,6 +84,17 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
                     <TbCopy /> {localized("send.send-to-image-viewer.copy")}
                   </Button>
                 </div>
+                <Button
+                  variant="primary"
+                  css={css`
+                    margin-top: 0.5em;
+                  `}
+                  onClick={() => {
+                    router.navigate({ href: "/", replace: true });
+                  }}
+                >
+                  {localized("send.back-to-home")}
+                </Button>
               </>
             );
           case "error":

@@ -53,5 +53,6 @@
   "send.print-to-vrchat-print.failed": "Upload failed.",
   "config.api-key": "API Key",
   "send.print-to-vrchat-print.vrchat-api-key-missing": "VRChat API key is not configured. Please set it in vrchatApiKey in configuration file.",
-  "capture.start": "Capture the screen"
+  "capture.start": "Capture the screen",
+  "send.back-to-home": "Back to home"
 }
