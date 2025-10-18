@@ -155,7 +155,7 @@ export default function SendPageComponent(props: SendPageComponentProps) {
               <TbClipboard />
             </CardIcon>
             <CardTitle>{localized("send.copy-on-upload")}</CardTitle>
-            <CardDescription>
+            <CardDescription style={{ right: "4em" }}>
               {localized("send.copy-on-upload.description")}
             </CardDescription>
             <CardAction>
