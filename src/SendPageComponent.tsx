@@ -8,7 +8,6 @@ import { extractImageProps } from "./extractImageProps";
 import ButtonCard from "./ButtonCard";
 import { TbClipboard, TbMovie, TbPhotoUp, TbPrinter } from "react-icons/tb";
 import Card, { CardAction, CardDescription, CardIcon, CardTitle } from "./Card";
-import LimitedText from "./LimitedText";
 import { useCallback, useId } from "react";
 import SendToVRChatPrintMode from "./SendToVRChatPrintMode";
 import { useLocalized } from "./i18n";
@@ -157,9 +156,7 @@ export default function SendPageComponent(props: SendPageComponentProps) {
             </CardIcon>
             <CardTitle>{localized("send.copy-on-upload")}</CardTitle>
             <CardDescription>
-              <LimitedText>
-                {localized("send.copy-on-upload.description")}
-              </LimitedText>
+              {localized("send.copy-on-upload.description")}
             </CardDescription>
             <CardAction>
               <label

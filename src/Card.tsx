@@ -32,8 +32,15 @@ const CardDescription = styled.div`
   position: absolute;
   top: 2.5em;
   left: 5em;
+  right: 1em;
   color: #666;
   font-size: 0.8em;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 1.2em;
+  text-align: left;
 `;
 
 const CardAction = styled.div`
