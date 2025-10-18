@@ -8,7 +8,10 @@ import useBoundingClientRect from "@/useClientBoundingBox";
 import { css } from "@emotion/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { useCallback, useState } from "react";
 import useSWR from "swr";
+import { usePopper } from "react-popper";
+import Button from "@/Button";
 
 export const Route = createFileRoute("/capture")({
   component: RouteComponent,
@@ -40,6 +43,42 @@ function RouteComponent() {
 
   const { ref, boundingClientRect } = useBoundingClientRect();
 
+  const boundingRectInRootCssPixel = boundingInRootCssPixel(state);
+
+  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
+    null,
+  );
+  const [popperElement, setPopperElement] = useState<HTMLElement | null>(null);
+  // const [arrowElement, setArrowElement] = useState<HTMLElement | null>(null);
+
+  const { styles: popperStyles } = usePopper(referenceElement, popperElement, {
+    strategy: "fixed",
+    placement: "bottom-end",
+  });
+
+  const onSendClicked = useCallback(() => {
+    if (!webviewWidowLabel) {
+      return;
+    }
+
+    const rootBoundingClientRect = boundingClientRect;
+
+    if (!rootBoundingClientRect) {
+      return;
+    }
+
+    const rect = {
+      x1: boundingRectInRootCssPixel.left / boundingClientRect.width,
+      y1: boundingRectInRootCssPixel.top / boundingClientRect.height,
+      x2: boundingRectInRootCssPixel.right / boundingClientRect.width,
+      y2: boundingRectInRootCssPixel.bottom / boundingClientRect.height,
+    };
+
+    commands
+      .finishCaptureWithCroppedRect(webviewWidowLabel, rect)
+      .catch(console.error);
+  }, [webviewWidowLabel, boundingClientRect, boundingRectInRootCssPixel]);
+
   return (
     <div>
       <div
@@ -64,42 +103,14 @@ function RouteComponent() {
             z-index: 10;
           `}
         >
-          <button
+          <Button
+            variant="secondary"
             onClick={() => {
               commands.stopCapture().catch(console.error);
             }}
           >
             Stop capture
-          </button>
-          <button
-            onClick={() => {
-              if (!webviewWidowLabel) {
-                return;
-              }
-
-              const boundingRectInRootCssPixel = boundingInRootCssPixel(state);
-
-              const rootBoundingClientRect = boundingClientRect;
-
-              if (!rootBoundingClientRect) {
-                return;
-              }
-
-              console.log(boundingRectInRootCssPixel);
-
-              const rect = {
-                x1: boundingRectInRootCssPixel.left / boundingClientRect.width,
-                y1: boundingRectInRootCssPixel.top / boundingClientRect.height,
-                x2: boundingRectInRootCssPixel.right / boundingClientRect.width,
-                y2:
-                  boundingRectInRootCssPixel.bottom / boundingClientRect.height,
-              };
-
-              commands
-                .finishCaptureWithCroppedRect(webviewWidowLabel, rect)
-                .catch(console.error);
-            }}
-          ></button>
+          </Button>
         </div>
         <BoundingSelector
           width="100%"
@@ -107,6 +118,35 @@ function RouteComponent() {
           state={state}
           dispatch={dispatch}
         />
+        <div
+          ref={setReferenceElement}
+          style={{
+            top: boundingRectInRootCssPixel.top,
+            left: boundingRectInRootCssPixel.left,
+            width:
+              boundingRectInRootCssPixel.right -
+              boundingRectInRootCssPixel.left,
+            height:
+              boundingRectInRootCssPixel.bottom -
+              boundingRectInRootCssPixel.top,
+          }}
+          css={css`
+            position: absolute;
+            pointer-events: none;
+            touch-action: none;
+          `}
+        ></div>
+        {state.type === "selected" ? (
+          <div
+            ref={setPopperElement}
+            style={popperStyles.popper}
+            css={css`
+              padding: 1em;
+            `}
+          >
+            <Button onClick={onSendClicked}>Send to VRC</Button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
