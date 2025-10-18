@@ -170,38 +170,42 @@ export default function BoundingSelector(props: BoundingSelectorProps) {
             })
           }
         ></div>
-        <Handle
-          xAssign="x1"
-          yAssign="y1"
-          x={state.type !== "idle" ? state.x1 : 0}
-          y={state.type !== "idle" ? state.y1 : 0}
-          id="handle-x1-y1"
-          onDragStart={onHandleDragStart}
-        />
-        <Handle
-          xAssign="x2"
-          yAssign="y2"
-          x={state.type !== "idle" ? state.x2 : 0}
-          y={state.type !== "idle" ? state.y2 : 0}
-          id="handle-x2-y2"
-          onDragStart={onHandleDragStart}
-        />
-        <Handle
-          xAssign="x1"
-          yAssign="y2"
-          x={state.type !== "idle" ? state.x1 : 0}
-          y={state.type !== "idle" ? state.y2 : 0}
-          id="handle-x1-y2"
-          onDragStart={onHandleDragStart}
-        />
-        <Handle
-          xAssign="x2"
-          yAssign="y1"
-          x={state.type !== "idle" ? state.x2 : 0}
-          y={state.type !== "idle" ? state.y1 : 0}
-          id="handle-x2-y1"
-          onDragStart={onHandleDragStart}
-        />
+        {state.type === "selected" ? (
+          <>
+            <Handle
+              xAssign="x1"
+              yAssign="y1"
+              x={state.x1}
+              y={state.y1}
+              id="handle-x1-y1"
+              onDragStart={onHandleDragStart}
+            />
+            <Handle
+              xAssign="x2"
+              yAssign="y2"
+              x={state.x2}
+              y={state.y2}
+              id="handle-x2-y2"
+              onDragStart={onHandleDragStart}
+            />
+            <Handle
+              xAssign="x1"
+              yAssign="y2"
+              x={state.x1}
+              y={state.y2}
+              id="handle-x1-y2"
+              onDragStart={onHandleDragStart}
+            />
+            <Handle
+              xAssign="x2"
+              yAssign="y1"
+              x={state.x2}
+              y={state.y1}
+              id="handle-x2-y1"
+              onDragStart={onHandleDragStart}
+            />
+          </>
+        ) : null}
       </div>
     </div>
   );
