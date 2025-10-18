@@ -52,5 +52,6 @@
   "send.print-to-vrchat-print.share-instruction": "Please use the Print feature to share.",
   "send.print-to-vrchat-print.failed": "Upload failed.",
   "config.api-key": "API Key",
-  "send.print-to-vrchat-print.vrchat-api-key-missing": "VRChat API key is not configured. Please set it in vrchatApiKey in configuration file."
+  "send.print-to-vrchat-print.vrchat-api-key-missing": "VRChat API key is not configured. Please set it in vrchatApiKey in configuration file.",
+  "capture.start": "Capture the screen"
 }

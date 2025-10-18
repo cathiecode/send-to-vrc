@@ -9,6 +9,7 @@ import Logo from "@/assets/logo.png";
 import { useLocalized } from "@/i18n";
 import { commands } from "@/bindings.gen";
 import AppLayout from "@/AppContainer";
+import { TbPhotoScan } from "react-icons/tb";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -53,9 +54,22 @@ function Index() {
           >
             Send to VRC
           </h1>
-          <div>
+          <div
+            css={css`
+              display: flex;
+              justify-content: center;
+              gap: 0.5em;
+            `}
+          >
             <Button onClick={onFilePickClicked}>
               {localized("send.select-file-for-upload")}
+            </Button>
+            <Button
+              onClick={() => {
+                commands.startCapture().catch(console.error);
+              }}
+            >
+              <TbPhotoScan /> {localized("capture.start")}
             </Button>
           </div>
           <div
@@ -70,13 +84,6 @@ function Index() {
             </Link>
           </div>
         </div>
-        <button
-          onClick={() => {
-            commands.startCapture().catch(console.error);
-          }}
-        >
-          Capture
-        </button>
       </Container>
     </AppLayout>
   );
