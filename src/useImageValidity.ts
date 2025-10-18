@@ -1,23 +1,29 @@
-import { invoke } from "@tauri-apps/api/core";
 import { atom, useAtomValue } from "jotai";
 import { loadable } from "jotai/utils";
 import { useMemo } from "react";
+import { commands } from "./bindings.gen";
 
-export function useImageValidity(filePath: string | undefined) {
+export function useImageValidity(
+  fileSendRequest: { filePath: string; requestedAt: number } | undefined,
+) {
   const isAbleToReadAtom = useMemo(
     () =>
       atom(async () => {
-        if (!filePath) {
+        if (!fileSendRequest?.filePath) {
           return false;
         }
 
-        const a: boolean = await invoke("is_able_to_read_image_file", {
-          filePath,
-        });
+        const result = await commands.isAbleToReadImageFile(
+          fileSendRequest.filePath,
+        );
 
-        return a;
+        if (result.status === "error") {
+          throw new Error("Failed to check image validity: " + result.error);
+        }
+
+        return result.data;
       }),
-    [filePath],
+    [fileSendRequest],
   );
 
   const loadableAtom = useMemo(

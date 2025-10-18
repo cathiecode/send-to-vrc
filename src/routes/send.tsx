@@ -13,10 +13,10 @@ import {
   vrchatPrintFeatureFlagAtom,
   sendImageToVRChatPrintAtom,
 } from "@/atoms";
-import { convertFileSrc } from "@tauri-apps/api/core";
 
 import SendPageComponent from "@/SendPageComponent";
 import AppLayout from "@/AppContainer";
+import convertFreshFileSrc from "@/convertFreshFileSrc";
 
 export const Route = createFileRoute("/send")({
   component: SendPage,
@@ -41,7 +41,7 @@ function SendPage() {
       return;
     }
 
-    sendImageToVideoPlayer(pickedFilePath);
+    sendImageToVideoPlayer(pickedFilePath.filePath);
   }, [pickedFilePath, localized, sendImageToVideoPlayer]);
 
   const onSendToImageViewerClicked = useCallback(() => {
@@ -50,7 +50,7 @@ function SendPage() {
       return;
     }
 
-    sendImageToImageViewer(pickedFilePath);
+    sendImageToImageViewer(pickedFilePath.filePath);
   }, [pickedFilePath, localized, sendImageToImageViewer]);
 
   const onSendToVrchatPrintClicked = useCallback(() => {
@@ -59,7 +59,7 @@ function SendPage() {
       return;
     }
 
-    sendImageToVRChatPrint(pickedFilePath);
+    sendImageToVRChatPrint(pickedFilePath.filePath);
   }, [pickedFilePath, localized, sendImageToVRChatPrint]);
 
   const setFileToSend = useSetAtom(setFileToSendAtom);
@@ -74,7 +74,7 @@ function SendPage() {
   );
 
   const imageFileSrc = useMemo(
-    () => pickedFilePath && convertFileSrc(pickedFilePath),
+    () => pickedFilePath && convertFreshFileSrc(pickedFilePath.filePath),
     [pickedFilePath],
   );
 
@@ -88,7 +88,7 @@ function SendPage() {
     <AppLayout>
       <SendPageComponent
         sendState={sendState}
-        pickedFilePath={pickedFilePath}
+        pickedFilePath={pickedFilePath?.filePath}
         imageFileSrc={imageFileSrc}
         imageValidity={imageValidity}
         shouldCopyAfterUpload={shouldCopyAfterUpload}
@@ -98,6 +98,7 @@ function SendPage() {
         onSendToVideoPlayerClicked={onSendToVideoPlayerClicked}
         onSendToVrchatPrintClicked={onSendToVrchatPrintClicked}
         onShouldCopyAfterUploadChanged={setShouldCopyAfterUpload}
+        key={pickedFilePath?.filePath + "-" + pickedFilePath?.requestedAt}
       />
     </AppLayout>
   );

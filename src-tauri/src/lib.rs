@@ -1,4 +1,5 @@
 use std::{
+    cmp,
     path::{Path, PathBuf},
     thread::sleep,
     time::Duration,
@@ -70,6 +71,7 @@ pub fn run() {
             get_system_locale,
             start_capture,
             stop_capture,
+            finish_capture_with_cropped_rect,
             get_capture_url_command
         ]);
 
@@ -876,7 +878,7 @@ fn capture_thread(
                 let window = tauri::webview::WebviewWindowBuilder::new(
                     &app_handle,
                     format!("capture_{}", i),
-                    tauri::WebviewUrl::App("/capture".into()),
+                    tauri::WebviewUrl::App("/capture/".into()),
                 )
                 .position(x, y)
                 .fullscreen(true)
@@ -979,4 +981,79 @@ fn capture_monitor(path: &Path, monitor: Monitor) -> Result<(), Box<dyn std::err
     }
 
     Err("No frame captured".into())
+}
+
+#[derive(Debug, Clone, Type, Serialize, Deserialize)]
+struct NormalizedRect {
+    x1: f32,
+    y1: f32,
+    x2: f32,
+    y2: f32,
+}
+
+impl NormalizedRect {
+    fn to_rect(&self, img_width: u32, img_height: u32) -> Rect {
+        Rect {
+            x1: (self.x1 * img_width as f32) as u32,
+            y1: (self.y1 * img_height as f32) as u32,
+            x2: (self.x2 * img_width as f32) as u32,
+            y2: (self.y2 * img_height as f32) as u32,
+        }
+    }
+}
+
+struct Rect {
+    x1: u32,
+    y1: u32,
+    x2: u32,
+    y2: u32,
+}
+
+#[tauri::command]
+#[specta::specta]
+fn finish_capture_with_cropped_rect(
+    app_handle: AppHandle,
+    monitor_id: &str,
+    rect: NormalizedRect,
+) -> Result<(), String> {
+    println!("Finishing capture with cropped rect: {:?}", rect);
+
+    let capture_path = get_capture_url(&app_handle, monitor_id.to_string())
+        .map_err(|e| format!("Failed to get capture URL: {e}"))?;
+
+    let result_path = temp_file_path("cropped.png");
+
+    let img =
+        image::open(&capture_path).map_err(|e| format!("Failed to open captured image: {e}"))?;
+
+    let rect = rect.to_rect(img.width(), img.height());
+
+    let x1 = cmp::min(rect.x1, rect.x2);
+    let y1 = cmp::min(rect.y1, rect.y2);
+    let width = cmp::max(rect.x1, rect.x2) - x1;
+    let height = cmp::max(rect.y1, rect.y2) - y1;
+
+    println!(
+        "Cropping image: x1={}, y1={}, width={}, height={}",
+        x1, y1, width, height
+    );
+
+    let cropped = img.crop_imm(
+        x1,
+        y1,
+        cmp::min(width, img.width() - x1),
+        cmp::min(height, img.height() - y1),
+    );
+
+    cropped
+        .save(&result_path)
+        .map_err(|e| format!("Failed to save cropped image: {e}"))?;
+
+    stop_capture(app_handle.clone())?;
+
+    app_handle
+        .emit("send_request", result_path.to_string_lossy().to_string())
+        .map_err(|e| format!("Failed to emit send_request event: {e}"))?;
+
+    Ok(())
 }

@@ -100,6 +100,14 @@ async stopCapture() : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async finishCaptureWithCroppedRect(monitorId: string, rect: NormalizedRect) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("finish_capture_with_cropped_rect", { monitorId, rect }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getCaptureUrlCommand(monitorId: string) : Promise<Result<string, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_capture_url_command", { monitorId }) };
@@ -121,6 +129,7 @@ async getCaptureUrlCommand(monitorId: string) : Promise<Result<string, string>> 
 /** user-defined types **/
 
 export type AppError = { type: "ConfigContents"; message: string } | { type: "ConfigExistance"; message: string } | { type: "ConfigDirectoryExistance"; message: string } | { type: "UploaderAuthRequired"; message: string } | { type: "Unknown"; message: string }
+export type NormalizedRect = { x1: number; y1: number; x2: number; y2: number }
 export type Tos = { version: number; content: string }
 
 /** tauri-specta globals **/

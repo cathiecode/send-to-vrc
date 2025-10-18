@@ -78,17 +78,23 @@ export type SendState =
 
 export const sendStateAtom = atom<SendState | undefined>();
 
-const fileToSendBaseAtom = atom<string | undefined>();
+const fileToSendBaseAtom = atom<
+  { filePath: string; requestedAt: number } | undefined
+>();
 
 export const fileToSendAtom = atom(
   (get) => {
     return (
       get(fileToSendBaseAtom) ??
-      mapPromise(get(optionsAtom), (opts) => opts.fileToSend)
+      mapPromise(get(optionsAtom), (opts) =>
+        opts.fileToSend !== undefined
+          ? { filePath: opts.fileToSend, requestedAt: 0 }
+          : undefined,
+      )
     );
   },
   (_get, set, filePath: string) => {
-    set(fileToSendBaseAtom, filePath);
+    set(fileToSendBaseAtom, { filePath: filePath, requestedAt: Date.now() });
   },
 );
 

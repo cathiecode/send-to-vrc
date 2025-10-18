@@ -138,3 +138,35 @@ export default function useBoundingSelectorState(
 ) {
   return useReducer(stateMachine, initialState);
 }
+
+export function bounding(state: BoundingSelectorState): {
+  top: number;
+  left: number;
+  right: number;
+  bottom: number;
+} {
+  switch (state.type) {
+    case "idle":
+      return {
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      };
+    case "selecting":
+    case "selected":
+      return {
+        top: Math.min(state.y1, state.y2),
+        left: Math.min(state.x1, state.x2),
+        right: Math.max(state.x1, state.x2),
+        bottom: Math.max(state.y1, state.y2),
+      };
+    case "modifying-corner":
+      return {
+        top: Math.min(state.y1, state.y2),
+        left: Math.min(state.x1, state.x2),
+        right: Math.max(state.x1, state.x2),
+        bottom: Math.max(state.y1, state.y2),
+      };
+  }
+}

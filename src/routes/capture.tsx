@@ -1,9 +1,12 @@
 import { commands } from "@/bindings.gen";
 import BoundingSelector from "@/BoundingSelector";
-import useBoundingSelectorState from "@/useBoundingSelectorState";
+import convertFreshFileSrc from "@/convertFreshFileSrc";
+import useBoundingSelectorState, {
+  bounding as boundingInRootCssPixel,
+} from "@/useBoundingSelectorState";
+import useBoundingClientRect from "@/useClientBoundingBox";
 import { css } from "@emotion/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import useSWR from "swr";
 
@@ -12,23 +15,35 @@ export const Route = createFileRoute("/capture")({
 });
 
 function RouteComponent() {
-  const { data: previewUrl } = useSWR("captureUrl", async () => {
-    const webviewWidowLabel = await getCurrentWebviewWindow().label;
-
-    const captureUrl = await commands.getCaptureUrlCommand(webviewWidowLabel);
-
-    if (captureUrl.status === "error") {
-      throw new Error(captureUrl.error);
-    }
-
-    return convertFileSrc(captureUrl.data);
+  const { data: webviewWidowLabel } = useSWR("webviewWindowLabel", async () => {
+    return await getCurrentWebviewWindow().label;
   });
 
+  const { data: previewUrl } = useSWR(
+    ["captureUrl", webviewWidowLabel],
+    async () => {
+      if (!webviewWidowLabel) {
+        return undefined;
+      }
+
+      const captureUrl = await commands.getCaptureUrlCommand(webviewWidowLabel);
+
+      if (captureUrl.status === "error") {
+        throw new Error(captureUrl.error);
+      }
+
+      return convertFreshFileSrc(captureUrl.data);
+    },
+  );
+
   const [state, dispatch] = useBoundingSelectorState();
+
+  const { ref, boundingClientRect } = useBoundingClientRect();
 
   return (
     <div>
       <div
+        ref={ref}
         css={css`
           position: fixed;
           top: 0;
@@ -41,13 +56,51 @@ function RouteComponent() {
           background-color: #000;
         `}
       >
-        <button
-          onClick={() => {
-            commands.stopCapture().catch(console.error);
-          }}
+        <div
+          css={css`
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+          `}
         >
-          Stop capture
-        </button>
+          <button
+            onClick={() => {
+              commands.stopCapture().catch(console.error);
+            }}
+          >
+            Stop capture
+          </button>
+          <button
+            onClick={() => {
+              if (!webviewWidowLabel) {
+                return;
+              }
+
+              const boundingRectInRootCssPixel = boundingInRootCssPixel(state);
+
+              const rootBoundingClientRect = boundingClientRect;
+
+              if (!rootBoundingClientRect) {
+                return;
+              }
+
+              console.log(boundingRectInRootCssPixel);
+
+              const rect = {
+                x1: boundingRectInRootCssPixel.left / boundingClientRect.width,
+                y1: boundingRectInRootCssPixel.top / boundingClientRect.height,
+                x2: boundingRectInRootCssPixel.right / boundingClientRect.width,
+                y2:
+                  boundingRectInRootCssPixel.bottom / boundingClientRect.height,
+              };
+
+              commands
+                .finishCaptureWithCroppedRect(webviewWidowLabel, rect)
+                .catch(console.error);
+            }}
+          ></button>
+        </div>
         <BoundingSelector
           width="100%"
           height="100%"
