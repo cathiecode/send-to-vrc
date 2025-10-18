@@ -831,6 +831,16 @@ fn capture_thread(
             };
         }
 
+        let webview = app_handle.get_webview_window("main");
+
+        if let Some(window) = &webview {
+            if let Err(error) = window.hide() {
+                println!("Failed to hide main window: {:?}", error);
+            }
+        }
+
+        sleep(Duration::from_millis(500));
+
         // capture every screens
         let monitors = Monitor::enumerate().unwrap();
         for (i, monitor) in monitors.iter().enumerate() {
@@ -895,6 +905,12 @@ fn capture_thread(
 
                 window.close().unwrap();
             });
+        }
+
+        if let Some(window) = &webview {
+            if let Err(error) = window.show() {
+                println!("Failed to show main window: {:?}", error);
+            }
         }
 
         loop {
