@@ -909,6 +909,10 @@ fn capture_thread(
                     .set_position(*tauri_monitor.position())
                     .unwrap_or_else(|e| println!("Failed to set position for monitor: {:?}", e));
 
+                window
+                    .set_size(*tauri_monitor.size())
+                    .unwrap_or_else(|e| println!("Failed to set size for monitor: {:?}", e));
+
                 let mut request_receiver = request_receiver;
 
                 loop {
