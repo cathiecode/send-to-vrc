@@ -15,7 +15,8 @@
         "title": "Send to VRC",
         "width": 540,
         "height": 720,
-        "label": "main"
+        "label": "main",
+        "backgroundColor": "#eeeeee"
       }
     ],
     "security": {

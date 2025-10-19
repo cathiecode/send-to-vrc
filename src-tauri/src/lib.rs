@@ -9,7 +9,7 @@ use image::GenericImageView;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{window::Color, AppHandle, Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 use tokio::sync::broadcast::{Receiver, Sender};
 use windows_capture::{
@@ -901,6 +901,8 @@ fn capture_thread(
                     tauri_monitor.position().x as f64,
                     tauri_monitor.position().y as f64,
                 )
+                .transparent(true)
+                .background_color(Color(0, 0, 0, 0))
                 .build()
                 .unwrap();
 
