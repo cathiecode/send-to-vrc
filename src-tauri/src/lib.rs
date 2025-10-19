@@ -835,7 +835,7 @@ fn capture_thread(
 
         if let Some(window) = &webview {
             if let Err(error) = window.hide() {
-                println!("Failed to hide main window: {:?}", error);
+                info!("Failed to hide main window: {:?}", error);
             }
         }
 
@@ -849,12 +849,12 @@ fn capture_thread(
                 .map_err(|e| format!("Failed to get temp file path: {e}"))?;
 
             match capture_monitor(&path, *monitor) {
-                Ok(_) => println!("Captured monitor {} to {:?}", i, path),
-                Err(e) => println!("Failed to capture monitor {}: {}", i, e),
+                Ok(_) => info!("Captured monitor {} to {:?}", i, path),
+                Err(e) => info!("Failed to capture monitor {}: {}", i, e),
             }
         }
 
-        println!("Finished capturing all monitors.");
+        info!("Finished capturing all monitors.");
 
         let tauri_monitors = app_handle
             .available_monitors()
@@ -863,7 +863,7 @@ fn capture_thread(
         for (i, monitor) in monitors.iter().enumerate() {
             let tauri_monitor = tauri_monitors.get(i).ok_or("Not enough monitors")?.clone();
 
-            println!(
+            info!(
                 "Monitor {}(Tauri monitor: {}): {:?}, size: {:?}, position: {:?}",
                 i,
                 monitor
@@ -876,7 +876,7 @@ fn capture_thread(
 
             let app_handle = app_handle.clone();
 
-            println!("Spawning window for monitor {}", i);
+            info!("Spawning window for monitor {}", i);
 
             // NOTE: We add 10 pixel offset to avoid invalid monitor
             /*let x = tauri_monitor.work_area().position.x as f64 + 10.0;
@@ -907,11 +907,11 @@ fn capture_thread(
                 // NOTE: Somehow we need to set position after the window creation to make it work correctly
                 window
                     .set_position(*tauri_monitor.position())
-                    .unwrap_or_else(|e| println!("Failed to set position for monitor: {:?}", e));
+                    .unwrap_or_else(|e| info!("Failed to set position for monitor: {:?}", e));
 
                 window
                     .set_size(*tauri_monitor.size())
-                    .unwrap_or_else(|e| println!("Failed to set size for monitor: {:?}", e));
+                    .unwrap_or_else(|e| info!("Failed to set size for monitor: {:?}", e));
 
                 let mut request_receiver = request_receiver;
 
@@ -927,7 +927,7 @@ fn capture_thread(
 
         if let Some(window) = &webview {
             if let Err(error) = window.show() {
-                println!("Failed to show main window: {:?}", error);
+                info!("Failed to show main window: {:?}", error);
             }
         }
 
@@ -1005,7 +1005,7 @@ fn capture_monitor(path: &Path, monitor: Monitor) -> Result<(), Box<dyn std::err
         // frame.frame_info().LastPresentTime is zero.
 
         if frame.frame_info().LastPresentTime == 0 {
-            println!("Frame {} is empty", i);
+            info!("Frame {} is empty", i);
             continue;
         }
 
@@ -1050,7 +1050,7 @@ fn finish_capture_with_cropped_rect(
     monitor_id: &str,
     rect: NormalizedRect,
 ) -> Result<(), String> {
-    println!("Finishing capture with cropped rect: {:?}", rect);
+    info!("Finishing capture with cropped rect: {:?}", rect);
 
     let capture_path = get_capture_url(&app_handle, monitor_id.to_string())
         .map_err(|e| format!("Failed to get capture URL: {e}"))?;
@@ -1067,7 +1067,7 @@ fn finish_capture_with_cropped_rect(
     let width = cmp::max(rect.x1, rect.x2) - x1;
     let height = cmp::max(rect.y1, rect.y2) - y1;
 
-    println!(
+    info!(
         "Cropping image: x1={}, y1={}, width={}, height={}",
         x1, y1, width, height
     );
