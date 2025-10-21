@@ -903,6 +903,7 @@ fn capture_thread(
                 )
                 .transparent(true)
                 .background_color(Color(0, 0, 0, 0))
+                .resizable(false)
                 .build()
                 .unwrap();
 
