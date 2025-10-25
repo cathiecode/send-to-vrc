@@ -1,20 +1,22 @@
-import { css } from "@emotion/react";
-import { ImageViewerSendState } from "./atoms";
+import { VideoPlayerSendState } from "@/stores/atoms";
 import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
 import { useCallback, useMemo } from "react";
-import LimitedText from "./LimitedText";
-import Button from "./Button";
+import { css } from "@emotion/react";
+import Button from "@/components/ui/Button";
 import { TbCopy } from "react-icons/tb";
-import useClipboard from "./useClipboard";
-import { useLocalized } from "./i18n";
-import router from "./router";
+import LimitedText from "@/components/ui/LimitedText";
+import useClipboard from "@/hooks/useClipboard";
+import { useLocalized } from "@/i18n";
+import router from "@/stores/router";
 
-type SendToImageViewerMode = {
-  state: ImageViewerSendState;
+type SendToVideoPlayerModeProps = {
+  state: VideoPlayerSendState;
 };
 
-export default function SendToImageViewerMode(props: SendToImageViewerMode) {
+export default function SendToVideoPlayerMode(
+  props: SendToVideoPlayerModeProps,
+) {
   const { state } = props;
 
   const progressMessage = useProgressMessage();
@@ -24,13 +26,13 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
   const displayProgressMessage = useMemo(() => {
     switch (progressMessage) {
       case "Starting":
-        return localized("send.send-to-image-viewer.started");
+        return localized("send.send-to-video-player.started");
       case "Compressing":
-        return localized("send.send-to-image-viewer.compressing");
+        return localized("send.send-to-video-player.compressing");
       case "Uploading":
-        return localized("send.send-to-image-viewer.uploading");
+        return localized("send.send-to-video-player.uploading");
       default:
-        return localized("send.send-to-image-viewer.starting");
+        return localized("send.send-to-video-player.starting");
     }
   }, [progressMessage]);
 
@@ -64,11 +66,11 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
               <>
                 <StatusLineComponent
                   status="success"
-                  statusText={localized("send.send-to-image-viewer.succeeded")}
+                  statusText={localized("send.send-to-video-player.succeeded")}
                 />
                 <div>
                   {localized(
-                    "send.send-to-image-viewer.please-paste-url-to-image-viewer",
+                    "send.send-to-video-player.please-paste-url-to-video-player",
                   )}
                 </div>
                 <div
@@ -81,7 +83,7 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
                   <LimitedText width="15em">{state.url}</LimitedText>
                   <Button variant="secondary" onClick={onCopyClicked}>
                     {" "}
-                    <TbCopy /> {localized("send.send-to-image-viewer.copy")}
+                    <TbCopy /> {localized("send.send-to-video-player.copy")}
                   </Button>
                 </div>
                 <Button
@@ -101,7 +103,7 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
             return (
               <StatusLineComponent
                 status="error"
-                statusText={`${localized("send.send-to-image-viewer.failed")}(${state.message})`}
+                statusText={`${localized("send.send-to-video-player.failed")}(${state.message})`}
               />
             );
         }

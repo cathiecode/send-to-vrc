@@ -1,4 +1,4 @@
-import StatusLineComponent from "../StatusLineComponent";
+import StatusLineComponent from "@/features/send-image/StatusLineComponent";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta = {

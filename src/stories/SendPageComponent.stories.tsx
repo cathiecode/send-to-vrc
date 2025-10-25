@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite";
-import SendPageComponent from "@/SendPageComponent";
+import SendPageComponent from "@/features/send-image/SendPageComponent";
 
 const meta = {
   title: "SendToVRC/SendPageComponent",

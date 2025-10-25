@@ -1,22 +1,20 @@
-import { VideoPlayerSendState } from "./atoms";
+import { css } from "@emotion/react";
+import { ImageViewerSendState } from "@/stores/atoms";
 import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
 import { useCallback, useMemo } from "react";
-import { css } from "@emotion/react";
-import Button from "./Button";
+import LimitedText from "@/components/ui/LimitedText";
+import Button from "@/components/ui/Button";
 import { TbCopy } from "react-icons/tb";
-import LimitedText from "./LimitedText";
-import useClipboard from "./useClipboard";
-import { useLocalized } from "./i18n";
-import router from "./router";
+import useClipboard from "@/hooks/useClipboard";
+import { useLocalized } from "@/i18n";
+import router from "@/stores/router";
 
-type SendToVideoPlayerModeProps = {
-  state: VideoPlayerSendState;
+type SendToImageViewerMode = {
+  state: ImageViewerSendState;
 };
 
-export default function SendToVideoPlayerMode(
-  props: SendToVideoPlayerModeProps,
-) {
+export default function SendToImageViewerMode(props: SendToImageViewerMode) {
   const { state } = props;
 
   const progressMessage = useProgressMessage();
@@ -26,13 +24,13 @@ export default function SendToVideoPlayerMode(
   const displayProgressMessage = useMemo(() => {
     switch (progressMessage) {
       case "Starting":
-        return localized("send.send-to-video-player.started");
+        return localized("send.send-to-image-viewer.started");
       case "Compressing":
-        return localized("send.send-to-video-player.compressing");
+        return localized("send.send-to-image-viewer.compressing");
       case "Uploading":
-        return localized("send.send-to-video-player.uploading");
+        return localized("send.send-to-image-viewer.uploading");
       default:
-        return localized("send.send-to-video-player.starting");
+        return localized("send.send-to-image-viewer.starting");
     }
   }, [progressMessage]);
 
@@ -66,11 +64,11 @@ export default function SendToVideoPlayerMode(
               <>
                 <StatusLineComponent
                   status="success"
-                  statusText={localized("send.send-to-video-player.succeeded")}
+                  statusText={localized("send.send-to-image-viewer.succeeded")}
                 />
                 <div>
                   {localized(
-                    "send.send-to-video-player.please-paste-url-to-video-player",
+                    "send.send-to-image-viewer.please-paste-url-to-image-viewer",
                   )}
                 </div>
                 <div
@@ -83,7 +81,7 @@ export default function SendToVideoPlayerMode(
                   <LimitedText width="15em">{state.url}</LimitedText>
                   <Button variant="secondary" onClick={onCopyClicked}>
                     {" "}
-                    <TbCopy /> {localized("send.send-to-video-player.copy")}
+                    <TbCopy /> {localized("send.send-to-image-viewer.copy")}
                   </Button>
                 </div>
                 <Button
@@ -103,7 +101,7 @@ export default function SendToVideoPlayerMode(
             return (
               <StatusLineComponent
                 status="error"
-                statusText={`${localized("send.send-to-video-player.failed")}(${state.message})`}
+                statusText={`${localized("send.send-to-image-viewer.failed")}(${state.message})`}
               />
             );
         }

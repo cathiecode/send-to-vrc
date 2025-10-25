@@ -1,14 +1,14 @@
-import { setFileToSendAtom } from "@/atoms";
-import Button from "@/Button";
-import Container from "@/Container";
-import useFilePickerDialog from "@/useFilePickerDialog";
+import { setFileToSendAtom } from "@/stores/atoms";
+import Button from "@/components/ui/Button";
+import Container from "@/components/layout/Container";
+import useFilePickerDialog from "@/hooks/useFilePickerDialog";
 import { css } from "@emotion/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import Logo from "@/assets/logo.png";
 import { useLocalized } from "@/i18n";
 import { commands } from "@/bindings.gen";
-import AppLayout from "@/AppContainer";
+import AppLayout from "@/components/layout/AppContainer";
 import { TbPhotoScan } from "react-icons/tb";
 
 export const Route = createFileRoute("/")({

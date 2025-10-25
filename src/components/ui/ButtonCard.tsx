@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { css } from "storybook/internal/theming";
+import { css } from "@emotion/react";
 import Card, { CardTitle, CardDescription, CardIcon } from "./Card";
 
 type ButtonCardProps = {

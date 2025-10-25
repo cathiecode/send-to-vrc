@@ -1,10 +1,10 @@
-import { configAtom } from "@/atoms";
-import Container from "@/Container";
+import { configAtom } from "@/stores/atoms";
+import Container from "@/components/layout/Container";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAtom } from "jotai";
 import { FormEvent, useCallback, useState } from "react";
 import { useLocalized } from "@/i18n";
-import AppLayout from "@/AppContainer";
+import AppLayout from "@/components/layout/AppContainer";
 
 export const Route = createFileRoute("/config")({
   component: RouteComponent,

@@ -1,5 +1,5 @@
 import ImageFilePickerComponent from "./ImageFilePickerComponent";
-import useFilePickerDialog from "./useFilePickerDialog";
+import useFilePickerDialog from "@/hooks/useFilePickerDialog";
 
 type ImageFilePickerProps = {
   imageSrc?: string;

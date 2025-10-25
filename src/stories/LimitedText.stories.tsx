@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react";
-import LimitedText from "@/LimitedText";
+import LimitedText from "@/components/ui/LimitedText";
 
 const meta = {
   title: "SendToVRC/LimitedText",

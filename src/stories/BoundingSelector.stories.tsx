@@ -1,6 +1,6 @@
-import BoundingSelector from "@/BoundingSelector";
+import BoundingSelector from "@/components/ui/BoundingSelector";
 import { Meta, StoryObj } from "@storybook/react-vite";
-import useBoundingSelectorState from "@/useBoundingSelectorState";
+import useBoundingSelectorState from "@/hooks/useBoundingSelectorState";
 
 function BoundingSelectorProxy(
   props: Omit<

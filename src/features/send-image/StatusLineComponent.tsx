@@ -1,5 +1,5 @@
 import { css } from "storybook/internal/theming";
-import Switch, { Case } from "./Switch";
+import Switch, { Case } from "@/components/ui/Switch";
 import { TbCheck, TbLoader2, TbX } from "react-icons/tb";
 
 type StatusLineComponentProps = {

@@ -1,8 +1,8 @@
 import { RouterProvider } from "@tanstack/react-router";
-import router from "./router";
+import router from "./stores/router";
 import { useEffect } from "react";
 import { useSetAtom } from "jotai";
-import { setFileToSendAtom } from "./atoms";
+import { setFileToSendAtom } from "./stores/atoms";
 import { listen } from "@tauri-apps/api/event";
 
 type SendRequestEvent = string;

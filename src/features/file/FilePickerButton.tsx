@@ -1,4 +1,4 @@
-import useFilePickerDialog from "./useFilePickerDialog";
+import useFilePickerDialog from "@/hooks/useFilePickerDialog";
 
 type FilePickerButtonProps = {
   onFilePicked?: (path: string | undefined) => void;

@@ -1,4 +1,4 @@
-import { css } from "storybook/internal/theming";
+import { css } from "@emotion/react";
 
 type HeroImageProps = {
   src: string;

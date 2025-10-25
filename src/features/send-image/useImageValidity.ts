@@ -1,7 +1,7 @@
 import { atom, useAtomValue } from "jotai";
 import { loadable } from "jotai/utils";
 import { useMemo } from "react";
-import { commands } from "./bindings.gen";
+import { commands } from "@/bindings.gen";
 
 export function useImageValidity(
   fileSendRequest: { filePath: string; requestedAt: number } | undefined,

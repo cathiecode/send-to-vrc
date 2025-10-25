@@ -3,8 +3,8 @@ import { useFileOpenRequest } from "./file-handler";
 import { useCallback } from "react";
 import { TbUpload } from "react-icons/tb";
 import { useSetAtom } from "jotai";
-import { setFileToSendAtom } from "./atoms";
-import { useLocalized } from "./i18n";
+import { setFileToSendAtom } from "@/stores/atoms";
+import { useLocalized } from "@/i18n";
 
 export default function FileDrop() {
   const setFileToSend = useSetAtom(setFileToSendAtom);

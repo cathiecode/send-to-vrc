@@ -1,11 +1,11 @@
 import { css } from "@emotion/react";
-import { VRChatPrintSendState } from "./atoms";
+import { VRChatPrintSendState } from "@/stores/atoms";
 import StatusLineComponent from "./StatusLineComponent";
 import { useProgressMessage } from "./useProgressMessage";
 import { useMemo } from "react";
-import { useLocalized } from "./i18n";
-import Button from "./Button";
-import router from "./router";
+import { useLocalized } from "@/i18n";
+import Button from "@/components/ui/Button";
+import router from "@/stores/router";
 
 type SendToVRChatPrintModeProps = {
   state: VRChatPrintSendState;

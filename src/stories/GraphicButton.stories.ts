@@ -1,4 +1,4 @@
-import GraphicButton from "@/GraphicButton";
+import GraphicButton from "@/components/ui/GraphicButton";
 import { StoryObj } from "@storybook/react-vite";
 
 const meta = {

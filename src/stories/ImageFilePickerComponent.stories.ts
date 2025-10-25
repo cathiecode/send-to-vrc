@@ -1,4 +1,4 @@
-import ImageFilePickerComponent from "../ImageFilePickerComponent";
+import ImageFilePickerComponent from "@/features/send-image/ImageFilePickerComponent";
 import { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {

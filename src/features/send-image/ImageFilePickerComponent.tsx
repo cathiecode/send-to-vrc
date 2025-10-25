@@ -3,7 +3,7 @@ import { css } from "storybook/internal/theming";
 import useSWR from "swr";
 import { extractImageProps } from "./extractImageProps";
 import { TbPhotoQuestion } from "react-icons/tb";
-import { useLocalized } from "./i18n";
+import { useLocalized } from "@/i18n";
 
 type ImageFilePickerComponentProps = {
   imageSrc?: string;

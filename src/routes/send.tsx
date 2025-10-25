@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
-import { useImageValidity } from "@/useImageValidity";
+import { useImageValidity } from "@/features/send-image/useImageValidity";
 import { useLocalized } from "@/i18n";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
@@ -12,11 +12,11 @@ import {
   shouldCopyAfterUploadAtom,
   vrchatPrintFeatureFlagAtom,
   sendImageToVRChatPrintAtom,
-} from "@/atoms";
+} from "@/stores/atoms";
 
-import SendPageComponent from "@/SendPageComponent";
-import AppLayout from "@/AppContainer";
-import convertFreshFileSrc from "@/convertFreshFileSrc";
+import SendPageComponent from "@/features/send-image/SendPageComponent";
+import AppLayout from "@/components/layout/AppContainer";
+import convertFreshFileSrc from "@/features/file/convertFreshFileSrc";
 
 export const Route = createFileRoute("/send")({
   component: SendPage,

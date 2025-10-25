@@ -1,4 +1,4 @@
-import { commands } from "./bindings.gen";
+import { commands } from "@/bindings.gen";
 import z from "zod";
 import DEFAULT_CONFIG_JSON_URL from "../public/default_config.json?url";
 

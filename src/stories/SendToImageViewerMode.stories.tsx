@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite";
-import SendToVideoViewerMode from "@/SendToImageViewerMode";
+import SendToVideoViewerMode from "@/features/send-image/SendToImageViewerMode";
 
 const meta = {
   title: "SendToVRC/SendToVideoViewerMode",

@@ -1,11 +1,11 @@
 import { useCallback } from "react";
-import useBoundingClientRect from "./useClientBoundingBox";
+import useBoundingClientRect from "@/hooks/useClientBoundingBox";
 import { css } from "@emotion/react";
 import {
   bounding,
   BoundingSelectorEvent,
   BoundingSelectorState,
-} from "./useBoundingSelectorState";
+} from "@/hooks/useBoundingSelectorState";
 
 type BoundingSelectorBackgroundProps = {
   areaWidth: number;

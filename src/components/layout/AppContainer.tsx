@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
-import FileDrop from "./FileDrop";
-import NavigationBar from "./NavigationBar";
-import RegisterOverlay from "./RegisterOverlay";
+import FileDrop from "@/features/file/FileDrop";
+import NavigationBar from "@/components/navigation/NavigationBar";
+import RegisterOverlay from "@/features/send-image/RegisterOverlay";
 
 type AppLayoutProps = {
   children: React.ReactNode;

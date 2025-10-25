@@ -1,4 +1,4 @@
-import HeroImage from "../HeroImage";
+import HeroImage from "@/components/ui/HeroImage";
 import { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {

@@ -1,5 +1,5 @@
 import { StoryObj } from "@storybook/react-vite";
-import ButtonCard from "../ButtonCard";
+import ButtonCard from "@/components/ui/ButtonCard";
 import { TbAbc } from "react-icons/tb";
 
 const meta = {
