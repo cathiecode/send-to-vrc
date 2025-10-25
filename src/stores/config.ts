@@ -1,6 +1,6 @@
 import { commands } from "@/bindings.gen";
 import z from "zod";
-import DEFAULT_CONFIG_JSON_URL from "../public/default_config.json?url";
+import DEFAULT_CONFIG_JSON_URL from "../../public/default_config.json?url";
 
 const ConfigV1Schema = z.object({
   version: z.literal(1),
