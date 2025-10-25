@@ -17,6 +17,25 @@ async openResourceDir() : Promise<Result<null, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+async loadConfigFile() : Promise<Result<string, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("load_config_file") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async saveConfigFile(contents: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("save_config_file", { contents }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getSystemLocale() : Promise<string> {
+    return await TAURI_INVOKE("get_system_locale");
+},
 async isAbleToReadImageFile(filePath: string) : Promise<Result<boolean, null>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("is_able_to_read_image_file", { filePath }) };
@@ -49,22 +68,6 @@ async uploadImageToVrchatPrint(filePath: string, vrchatApiKey: string) : Promise
     else return { status: "error", error: e  as any };
 }
 },
-async loadConfigFile() : Promise<Result<string, AppError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("load_config_file") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async saveConfigFile(contents: string) : Promise<Result<null, AppError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("save_config_file", { contents }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
 async registerAnonymously(acceptedTosVersion: number, uploaderBaseUrl: string) : Promise<Result<string, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("register_anonymously", { acceptedTosVersion, uploaderBaseUrl }) };
@@ -80,9 +83,6 @@ async getTosAndVersion(uploaderBaseUrl: string) : Promise<Result<Tos, AppError>>
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
-},
-async getSystemLocale() : Promise<string> {
-    return await TAURI_INVOKE("get_system_locale");
 },
 async startCapture() : Promise<Result<null, string>> {
     try {
