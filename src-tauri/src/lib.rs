@@ -245,14 +245,7 @@ async fn upload_image_to_vrchat_print(
 
     let letterboxed_image_path = temp_file_path("letterboxed_image.png");
 
-    let (width, height) = (1280, 720);
-
-    resize_image_letterboxed(
-        file_path,
-        &letterboxed_image_path.to_string_lossy(),
-        width,
-        height,
-    )?;
+    resize_image_vrchat_print(file_path, &letterboxed_image_path.to_string_lossy())?;
 
     send_file_to_print(&letterboxed_image_path, vrchat_api_key).await
 }
@@ -339,6 +332,56 @@ fn resize_image_letterboxed(
     let x_offset = (width - resized_width) / 2;
     let y_offset = (height - resized_height) / 2;
     let resized_rgba = resized.to_rgba8();
+
+    let size = tiny_skia::IntSize::from_wh(resized_width, resized_height).ok_or(
+        AppError::Unknown("Failed to create pixmap with input dimensions".to_string()),
+    )?;
+
+    let resized_pixmap = tiny_skia::Pixmap::from_vec(resized_rgba.into_raw(), size).ok_or(
+        AppError::Unknown("Failed to create pixmap from resized image".to_string()),
+    )?;
+
+    canvas.draw_pixmap(
+        x_offset as i32,
+        y_offset as i32,
+        resized_pixmap.as_ref(),
+        &tiny_skia::PixmapPaint::default(),
+        tiny_skia::Transform::identity(),
+        None,
+    );
+
+    canvas
+        .save_png(output_path)
+        .map_err(AppError::from_error_with_message(
+            "Failed to save resized image",
+        ))?;
+
+    Ok(())
+}
+
+// NOTE: VRChat print uploading requires a png image that sized 2048x1440, and its main image scaled to be 1920x1080 and placed at (64,96).
+fn resize_image_vrchat_print(image_path: &str, output_path: &str) -> Result<(), AppError> {
+    let whole_width = 2048;
+    let whole_height = 1440;
+    let width = 1920;
+    let height = 1080;
+    let print_offset_x = 64;
+    let print_offset_y = 69;
+    // read the image with "image" crate
+    let input_image = image::open(image_path)
+        .map_err(AppError::from_error_with_message("Failed to open image"))?;
+
+    // resize the image
+    let image = input_image.resize(width, height, image::imageops::FilterType::Lanczos3);
+
+    // render letterboxed image with "tiny-skia" crate
+    let mut canvas = tiny_skia::Pixmap::new(whole_width, whole_height)
+        .ok_or(AppError::Unknown("Failed to create canvas".to_string()))?;
+    canvas.fill(tiny_skia::Color::WHITE); // fill with white background
+    let (resized_width, resized_height) = image.dimensions();
+    let x_offset = (width - resized_width) / 2 + print_offset_x;
+    let y_offset = (height - resized_height) / 2 + print_offset_y;
+    let resized_rgba = image.to_rgba8();
 
     let size = tiny_skia::IntSize::from_wh(resized_width, resized_height).ok_or(
         AppError::Unknown("Failed to create pixmap with input dimensions".to_string()),
