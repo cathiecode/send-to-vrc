@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { css } from "storybook/internal/theming";
+import { css } from "@emotion/react";
 import useSWR from "swr";
 import { extractImageProps } from "./extractImageProps";
 import { TbPhotoQuestion } from "react-icons/tb";
