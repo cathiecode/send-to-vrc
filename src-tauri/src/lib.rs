@@ -4,7 +4,6 @@ use tauri_plugin_opener::OpenerExt;
 
 use crate::prelude::*;
 
-mod build_config;
 mod capture;
 mod error;
 mod file;
@@ -99,12 +98,23 @@ fn open_resource_dir(handle: tauri::AppHandle) -> Result<(), AppError> {
 #[cfg(test)]
 mod test {
     use crate::{
-        build_config::{get_test_api_key, get_test_uploader_url_base_url},
         image::resize_image_letterboxed,
         image_to_image::upload_image_to_image_server_internal,
         image_to_video::{encode_image_to_video, upload_image_to_video_server_internal},
         uploader::{get_tos_and_version, register_anonymously},
     };
+
+    fn test_api_key() -> String {
+        dotenvy::dotenv().ok();
+        std::env::var("TEST_API_KEY").unwrap().to_string()
+    }
+
+    fn test_uploader_url_base_url() -> String {
+        dotenvy::dotenv().ok();
+        std::env::var("TEST_UPLOADER_URL_BASE_URL")
+            .unwrap()
+            .to_string()
+    }
 
     #[test]
     fn test_resize_image() {
@@ -152,8 +162,8 @@ mod test {
         let result = upload_image_to_video_server_internal(
             &ffmpeg_path,
             &input_file,
-            get_test_api_key(),
-            get_test_uploader_url_base_url(),
+            &test_api_key(),
+            &test_uploader_url_base_url(),
             None,
         )
         .await;
@@ -170,8 +180,8 @@ mod test {
 
         let result = upload_image_to_image_server_internal(
             &input_file,
-            get_test_api_key(),
-            get_test_uploader_url_base_url(),
+            &test_api_key(),
+            &test_uploader_url_base_url(),
             None,
         )
         .await;
@@ -182,7 +192,7 @@ mod test {
 
     #[tokio::test]
     async fn test_load_tos() {
-        let result = get_tos_and_version(get_test_uploader_url_base_url()).await;
+        let result = get_tos_and_version(&test_uploader_url_base_url()).await;
 
         eprintln!("Result: {:?}", result);
         assert!(result.is_ok());
@@ -190,14 +200,14 @@ mod test {
 
     #[tokio::test]
     async fn test_register_anonymously() {
-        let result = register_anonymously(1, get_test_uploader_url_base_url()).await;
+        let result = register_anonymously(1, &test_uploader_url_base_url()).await;
         eprintln!("Result: {:?}", result);
         assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_register_anonymously_fail() {
-        let result = register_anonymously(9999, get_test_uploader_url_base_url()).await;
+        let result = register_anonymously(9999, &test_uploader_url_base_url()).await;
         eprintln!("Result: {:?}", result);
         assert!(result.is_err());
     }
