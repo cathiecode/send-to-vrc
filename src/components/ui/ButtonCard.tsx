@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { css } from "@emotion/react";
-import Card, { CardTitle, CardDescription, CardIcon } from "./Card";
+import Card, { CardDescription, CardIcon, CardTitle } from "./Card";
 
 type ButtonCardProps = {
   icon: ReactNode;

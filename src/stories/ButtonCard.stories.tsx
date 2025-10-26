@@ -1,6 +1,6 @@
+import { TbAbc } from "react-icons/tb";
 import { StoryObj } from "@storybook/react-vite";
 import ButtonCard from "@/components/ui/ButtonCard";
-import { TbAbc } from "react-icons/tb";
 
 const meta = {
   title: "SendToVRC/ButtonCard",

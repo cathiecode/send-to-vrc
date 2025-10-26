@@ -1,5 +1,5 @@
-import fs, { cpSync, mkdirSync, readdirSync, rm, rmSync } from "fs";
 import archiver from "archiver";
+import fs, { cpSync, mkdirSync, readdirSync, rm, rmSync } from "fs";
 
 function getVersion() {
   const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));

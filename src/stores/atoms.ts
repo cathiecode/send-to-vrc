@@ -1,12 +1,12 @@
-import { invoke } from "@tauri-apps/api/core";
 import { atom } from "jotai";
-import { parseArgs } from "./args";
+import { atomWithRefresh } from "jotai/utils";
+import { invoke } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import router from "@/stores/router";
-import { createTaskAtom } from "./task";
-import { Config, loadConfig, saveConfig } from "./config";
-import { atomWithRefresh } from "jotai/utils";
 import { commands } from "@/bindings.gen";
+import { parseArgs } from "./args";
+import { Config, loadConfig, saveConfig } from "./config";
+import { createTaskAtom } from "./task";
 
 let cachedArgs: string[] | null = null;
 

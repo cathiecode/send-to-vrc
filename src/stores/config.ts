@@ -1,5 +1,5 @@
-import { commands } from "@/bindings.gen";
 import z from "zod";
+import { commands } from "@/bindings.gen";
 import DEFAULT_CONFIG_JSON_URL from "../../public/default_config.json?url";
 
 const ConfigV1Schema = z.object({

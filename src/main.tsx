@@ -1,12 +1,12 @@
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.scss";
-import { parseArgs } from "@/stores/args";
-import { commands } from "./bindings.gen";
 import { ErrorBoundary } from "react-error-boundary";
-import ErrorComponent from "@/components/layout/ErrorComponent";
 import RewriteLangTag from "@/components/i18n/RewriteLangTag";
+import ErrorComponent from "@/components/layout/ErrorComponent";
+import { parseArgs } from "@/stores/args";
+import App from "./App";
+import { commands } from "./bindings.gen";
+import "./index.scss";
 
 async function main() {
   const args = await commands.getArgs();

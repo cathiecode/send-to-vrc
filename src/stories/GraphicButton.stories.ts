@@ -1,5 +1,5 @@
-import GraphicButton from "@/components/ui/GraphicButton";
 import { StoryObj } from "@storybook/react-vite";
+import GraphicButton from "@/components/ui/GraphicButton";
 
 const meta = {
   title: "SendToVRC/GraphicButton",

@@ -1,15 +1,15 @@
 import { TbExternalLink } from "react-icons/tb";
-import Button from "@/components/ui/Button";
-import { openResourceDir } from "@/ipc";
+import useSWR from "swr";
 import { css } from "@emotion/react";
 import { createFileRoute } from "@tanstack/react-router";
-import Container from "@/components/layout/Container";
-import Logo from "@/assets/logo.png";
-import useSWR from "swr";
 import { getVersion } from "@tauri-apps/api/app";
-import { useLocalized } from "@/i18n";
-import { lfToBr } from "@/utils";
 import AppLayout from "@/components/layout/AppContainer";
+import Container from "@/components/layout/Container";
+import Button from "@/components/ui/Button";
+import Logo from "@/assets/logo.png";
+import { useLocalized } from "@/i18n";
+import { openResourceDir } from "@/ipc";
+import { lfToBr } from "@/utils";
 
 export const Route = createFileRoute("/about")({
   component: AboutPage,

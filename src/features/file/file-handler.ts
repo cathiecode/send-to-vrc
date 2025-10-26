@@ -1,5 +1,5 @@
-import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { useCallback, useEffect, useState } from "react";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 
 type OnEnterHandler = () => void;
 type OnDropHandler = (filePath: string) => void;

@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
-import FileDrop from "@/features/file/FileDrop";
 import NavigationBar from "@/components/navigation/NavigationBar";
+import FileDrop from "@/features/file/FileDrop";
 import RegisterOverlay from "@/features/send-image/RegisterOverlay";
 
 type AppLayoutProps = {

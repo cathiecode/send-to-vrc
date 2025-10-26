@@ -1,10 +1,10 @@
-import { css } from "@emotion/react";
-import { useFileOpenRequest } from "./file-handler";
+import { useSetAtom } from "jotai";
 import { useCallback } from "react";
 import { TbUpload } from "react-icons/tb";
-import { useSetAtom } from "jotai";
+import { css } from "@emotion/react";
 import { setFileToSendAtom } from "@/stores/atoms";
 import { useLocalized } from "@/i18n";
+import { useFileOpenRequest } from "./file-handler";
 
 export default function FileDrop() {
   const setFileToSend = useSetAtom(setFileToSendAtom);

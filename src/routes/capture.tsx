@@ -1,17 +1,17 @@
-import { commands } from "@/bindings.gen";
+import { useCallback, useState } from "react";
+import { usePopper } from "react-popper";
+import useSWR from "swr";
+import { css } from "@emotion/react";
+import { createFileRoute } from "@tanstack/react-router";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import BoundingSelector from "@/components/ui/BoundingSelector";
-import convertFreshFileSrc from "@/features/file/convertFreshFileSrc";
+import Button from "@/components/ui/Button";
 import useBoundingSelectorState, {
   bounding as boundingInRootCssPixel,
 } from "@/hooks/useBoundingSelectorState";
 import useBoundingClientRect from "@/hooks/useClientBoundingBox";
-import { css } from "@emotion/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { useCallback, useState } from "react";
-import useSWR from "swr";
-import { usePopper } from "react-popper";
-import Button from "@/components/ui/Button";
+import convertFreshFileSrc from "@/features/file/convertFreshFileSrc";
+import { commands } from "@/bindings.gen";
 
 export const Route = createFileRoute("/capture")({
   component: RouteComponent,

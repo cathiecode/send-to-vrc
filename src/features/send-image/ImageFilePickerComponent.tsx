@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { css } from "@emotion/react";
-import useSWR from "swr";
-import { extractImageProps } from "./extractImageProps";
 import { TbPhotoQuestion } from "react-icons/tb";
+import useSWR from "swr";
+import { css } from "@emotion/react";
 import { useLocalized } from "@/i18n";
+import { extractImageProps } from "./extractImageProps";
 
 type ImageFilePickerComponentProps = {
   imageSrc?: string;

@@ -1,5 +1,5 @@
-import StatusLineComponent from "@/features/send-image/StatusLineComponent";
 import { Meta, StoryObj } from "@storybook/react";
+import StatusLineComponent from "@/features/send-image/StatusLineComponent";
 
 const meta = {
   title: "SendToVRC/StatusLineComponent",

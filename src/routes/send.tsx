@@ -1,22 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
-import { useImageValidity } from "@/features/send-image/useImageValidity";
-import { useLocalized } from "@/i18n";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import {
-  sendImageToVideoPlayerAtom,
-  sendImageToImageViewerAtom,
-  sendStateAtom,
-  setFileToSendAtom,
-  fileToSendAtom,
-  shouldCopyAfterUploadAtom,
-  vrchatPrintFeatureFlagAtom,
-  sendImageToVRChatPrintAtom,
-} from "@/stores/atoms";
-
-import SendPageComponent from "@/features/send-image/SendPageComponent";
+import { useCallback, useMemo } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import AppLayout from "@/components/layout/AppContainer";
 import convertFreshFileSrc from "@/features/file/convertFreshFileSrc";
+import SendPageComponent from "@/features/send-image/SendPageComponent";
+import { useImageValidity } from "@/features/send-image/useImageValidity";
+import {
+  fileToSendAtom,
+  sendImageToImageViewerAtom,
+  sendImageToVRChatPrintAtom,
+  sendImageToVideoPlayerAtom,
+  sendStateAtom,
+  setFileToSendAtom,
+  shouldCopyAfterUploadAtom,
+  vrchatPrintFeatureFlagAtom,
+} from "@/stores/atoms";
+import { useLocalized } from "@/i18n";
 
 export const Route = createFileRoute("/send")({
   component: SendPage,

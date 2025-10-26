@@ -1,15 +1,15 @@
-import { setFileToSendAtom } from "@/stores/atoms";
-import Button from "@/components/ui/Button";
-import Container from "@/components/layout/Container";
-import useFilePickerDialog from "@/hooks/useFilePickerDialog";
-import { css } from "@emotion/react";
-import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
-import Logo from "@/assets/logo.png";
-import { useLocalized } from "@/i18n";
-import { commands } from "@/bindings.gen";
-import AppLayout from "@/components/layout/AppContainer";
 import { TbPhotoScan } from "react-icons/tb";
+import { css } from "@emotion/react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import AppLayout from "@/components/layout/AppContainer";
+import Container from "@/components/layout/Container";
+import Button from "@/components/ui/Button";
+import useFilePickerDialog from "@/hooks/useFilePickerDialog";
+import { setFileToSendAtom } from "@/stores/atoms";
+import Logo from "@/assets/logo.png";
+import { commands } from "@/bindings.gen";
+import { useLocalized } from "@/i18n";
 
 export const Route = createFileRoute("/")({
   component: Index,

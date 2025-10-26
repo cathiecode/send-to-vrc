@@ -1,14 +1,14 @@
-import { css } from "@emotion/react";
-import { configAtom, registerRequestAtom } from "@/stores/atoms";
-import { useTaskRequestAtom } from "@/stores/task";
-import Button from "@/components/ui/Button";
+import { useAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
-import { commands } from "@/bindings.gen";
-import StatusLineComponent from "./StatusLineComponent";
-import { useAtom } from "jotai";
+import { css } from "@emotion/react";
+import Button from "@/components/ui/Button";
 import Overlay from "@/components/ui/Overlay";
+import { configAtom, registerRequestAtom } from "@/stores/atoms";
+import { useTaskRequestAtom } from "@/stores/task";
+import { commands } from "@/bindings.gen";
 import { useLocalized } from "@/i18n";
+import StatusLineComponent from "./StatusLineComponent";
 
 function RegisterOverlayContents() {
   const taskRequest = useTaskRequestAtom(registerRequestAtom);

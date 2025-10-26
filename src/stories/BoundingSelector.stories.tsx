@@ -1,5 +1,5 @@
-import BoundingSelector from "@/components/ui/BoundingSelector";
 import { Meta, StoryObj } from "@storybook/react-vite";
+import BoundingSelector from "@/components/ui/BoundingSelector";
 import useBoundingSelectorState from "@/hooks/useBoundingSelectorState";
 
 function BoundingSelectorProxy(

@@ -1,5 +1,5 @@
-import HeroImage from "@/components/ui/HeroImage";
 import { Meta, StoryObj } from "@storybook/react-vite";
+import HeroImage from "@/components/ui/HeroImage";
 
 const meta = {
   title: "SendToVRC/HeroImage",

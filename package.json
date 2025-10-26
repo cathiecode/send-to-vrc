@@ -57,6 +57,7 @@
     "@tanstack/react-router-devtools": "^1.131.50",
     "@tanstack/router-plugin": "^1.131.50",
     "@tauri-apps/cli": "^2",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
