@@ -4,5 +4,3 @@ import { routeTree } from "@/routeTree.gen";
 const router = createRouter({ routeTree });
 
 export default router;
-
-router.update;

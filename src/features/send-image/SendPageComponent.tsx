@@ -58,7 +58,7 @@ export default function SendPageComponent(props: SendPageComponentProps) {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       props.onShouldCopyAfterUploadChanged?.(e.target.checked);
     },
-    [],
+    [props],
   );
 
   const localized = useLocalized();

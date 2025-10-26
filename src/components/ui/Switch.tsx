@@ -10,6 +10,7 @@ type CaseProps<T> = {
   children?: React.ReactNode;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const switchValueContext = createContext<any>(null);
 
 export default function Switch<T>(props: SwitchProps<T>) {

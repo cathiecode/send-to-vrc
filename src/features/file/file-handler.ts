@@ -49,22 +49,25 @@ export function useFileOpenRequest(handlers: Handlers) {
   const onEnter = useCallback(() => {
     setIsOver(true);
     onEnterHandler?.();
-  }, []);
+  }, [onEnterHandler]);
 
-  const onDrop = useCallback((filePath: string) => {
-    setIsOver(false);
-    onDropHandler?.(filePath);
-  }, []);
+  const onDrop = useCallback(
+    (filePath: string) => {
+      setIsOver(false);
+      onDropHandler?.(filePath);
+    },
+    [onDropHandler],
+  );
 
   const onOver = useCallback(() => {
     setIsOver(true);
     onOverHandler?.();
-  }, []);
+  }, [onOverHandler]);
 
   const onLeave = useCallback(() => {
     setIsOver(false);
     onLeaveHandler?.();
-  }, []);
+  }, [onLeaveHandler]);
 
   useEffect(() => {
     const unlisten = listenFileOpenRequest({
@@ -77,7 +80,16 @@ export function useFileOpenRequest(handlers: Handlers) {
     return () => {
       unlisten();
     };
-  }, [onEnterHandler, onDropHandler, onOverHandler, onLeaveHandler]);
+  }, [
+    onEnterHandler,
+    onDropHandler,
+    onOverHandler,
+    onLeaveHandler,
+    onEnter,
+    onDrop,
+    onOver,
+    onLeave,
+  ]);
 
   return {
     isOver,

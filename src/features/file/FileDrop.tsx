@@ -10,10 +10,13 @@ export default function FileDrop() {
   const setFileToSend = useSetAtom(setFileToSendAtom);
   const localized = useLocalized();
 
-  const onDrop = useCallback((filePath: string) => {
-    console.log("File dropped:", filePath);
-    setFileToSend(filePath);
-  }, []);
+  const onDrop = useCallback(
+    (filePath: string) => {
+      console.log("File dropped:", filePath);
+      setFileToSend(filePath);
+    },
+    [setFileToSend],
+  );
 
   const { isOver } = useFileOpenRequest({
     onDropHandler: onDrop,

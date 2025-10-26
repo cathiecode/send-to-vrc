@@ -3,3 +3,5 @@ src-tauri/target
 src-tauri/gen
 src/*.gen.ts
 .tanstack
+*.zip
+*.exe

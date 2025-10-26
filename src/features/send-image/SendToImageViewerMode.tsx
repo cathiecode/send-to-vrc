@@ -32,7 +32,7 @@ export default function SendToImageViewerMode(props: SendToImageViewerMode) {
       default:
         return localized("send.send-to-image-viewer.starting");
     }
-  }, [progressMessage]);
+  }, [localized, progressMessage]);
 
   const { writeText } = useClipboard();
 

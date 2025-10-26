@@ -34,7 +34,7 @@ export default function SendToVideoPlayerMode(
       default:
         return localized("send.send-to-video-player.starting");
     }
-  }, [progressMessage]);
+  }, [localized, progressMessage]);
 
   const { writeText } = useClipboard();
 

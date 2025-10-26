@@ -24,7 +24,7 @@ function App() {
           console.error("Failed to listen to send_request events:", e);
         });
     };
-  }, []);
+  }, [setFileToSend]);
   return <RouterProvider router={router} />;
 }
 

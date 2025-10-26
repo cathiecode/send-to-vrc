@@ -53,7 +53,7 @@ function RegisterOverlayContents() {
     });
 
     taskRequest?.resolve();
-  }, [taskRequest, config.uploaderUrlBase, setConfig]);
+  }, [tos, config.uploaderUrlBase, setConfig, taskRequest, localized]);
 
   const onRejectClick = useCallback(() => {
     taskRequest?.reject(new Error(localized("send.tos.error.denied")));

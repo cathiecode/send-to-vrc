@@ -98,7 +98,7 @@ export default function BoundingSelector(props: BoundingSelectorProps) {
         handleId: id,
       });
     },
-    [],
+    [dispatch],
   );
 
   return (

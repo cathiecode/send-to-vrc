@@ -22,7 +22,7 @@ function RouteComponent() {
       await setConfig(configDraft);
       return false;
     },
-    [configDraft],
+    [configDraft, setConfig],
   );
 
   return (

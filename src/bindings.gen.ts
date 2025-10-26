@@ -68,6 +68,38 @@ async uploadImageToVrchatPrint(filePath: string, vrchatApiKey: string) : Promise
     else return { status: "error", error: e  as any };
 }
 },
+async login(username: string, password: string) : Promise<Result<LoginResult, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("login", { username, password }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getCurrentUserName(authCookie: string) : Promise<Result<string, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_current_user_name", { authCookie }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async submitTotpCode(authCookie: string, totpCode: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("submit_totp_code", { authCookie, totpCode }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async submitEmailOtpCode(authCookie: string, otpCode: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("submit_email_otp_code", { authCookie, otpCode }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async registerAnonymously(acceptedTosVersion: number, uploaderBaseUrl: string) : Promise<Result<string, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("register_anonymously", { acceptedTosVersion, uploaderBaseUrl }) };
@@ -129,8 +161,10 @@ async getCaptureUrlCommand(monitorId: string) : Promise<Result<string, string>> 
 /** user-defined types **/
 
 export type AppError = { type: "ConfigContents"; message: string } | { type: "ConfigExistance"; message: string } | { type: "ConfigDirectoryExistance"; message: string } | { type: "UploaderAuthRequired"; message: string } | { type: "Unknown"; message: string }
+export type LoginResult = { Success: string } | { RequiresTwoFactorAuth: [string, TwoFactorMethod[]] }
 export type NormalizedRect = { x1: number; y1: number; x2: number; y2: number }
 export type Tos = { version: number; content: string }
+export type TwoFactorMethod = "Totp" | "EmailOtp" | { Unknown: string }
 
 /** tauri-specta globals **/
 
