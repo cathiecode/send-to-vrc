@@ -13,3 +13,5 @@
 /resources/ffmpeg-source-code.zip
 
 /src/build_config.rs
+
+/.env
