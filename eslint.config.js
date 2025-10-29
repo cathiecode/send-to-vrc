@@ -1,4 +1,4 @@
-import prettier from "eslint-plugin-prettier/recommended";
+import eslintConfigPrettierFlat from "eslint-config-prettier/flat";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import { defineConfig } from "eslint/config";
@@ -11,7 +11,7 @@ export default defineConfig([
   },
   js.configs.recommended,
   ts.configs.recommended,
-  prettier,
+  eslintConfigPrettierFlat,
   react.configs.flat.recommended,
   react.configs.flat["jsx-runtime"],
   reactHooks.configs.flat.recommended,
