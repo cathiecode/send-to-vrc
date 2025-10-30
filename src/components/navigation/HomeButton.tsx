@@ -1,14 +1,16 @@
 import { useCallback } from "react";
-import { TbArrowLeft } from "react-icons/tb";
+import { TbHome } from "react-icons/tb";
 import { css } from "@emotion/react";
-import { useCanGoBack, useRouter } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 
-export default function BackButton() {
+export default function HomeButton() {
   const router = useRouter();
-  const canBack = useCanGoBack();
+  const canGoHome = router.state.location.pathname !== "/";
 
   const onClick = useCallback(() => {
-    router.history.back();
+    if (router.state.location.pathname !== "/") {
+      location.href = "/"; // Force full reload to reset state
+    }
   }, [router]);
 
   return (
@@ -34,9 +36,9 @@ export default function BackButton() {
         }
       `}
       onClick={onClick}
-      disabled={!canBack}
+      disabled={!canGoHome}
     >
-      <TbArrowLeft />
+      <TbHome />
     </button>
   );
 }
