@@ -65,7 +65,7 @@
   "vrchat-login.status.logging-in": "ログインしています",
   "vrchat-login.status.failed": "ログインに失敗しました",
   "vrchat-login.otp.enter-from-email": "Emailに送られたOTPコードを入力",
-  "vrcaht-login.otp.enter-from-authenticator-app": "認証アプリで生成されたコードを入力",
+  "vrchat-login.otp.enter-from-authenticator-app": "認証アプリで生成されたコードを入力",
   "vrchat-login.otp.code": "コード",
   "vrchat-login.otp.cancel": "キャンセル",
   "vrchat-login.otp.verify": "検証",
@@ -76,5 +76,8 @@
   "vrchat-login.username.status.not-logged-in": "ログインしていません",
   "send.uploader-api-key": "アップローダのAPIキー",
   "vrchat-login.api-key": "VRChatのAPIキー",
-  "vrchat-login.logout": "ログアウト"
+  "vrchat-login.logout": "ログアウト",
+  "open-config-page": "設定",
+  "vrchat-login.please-login-to-vrchat": "VRChatにログイン",
+  "config.save-changes": "設定を保存"
 }
