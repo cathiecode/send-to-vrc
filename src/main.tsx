@@ -3,26 +3,11 @@ import ReactDOM from "react-dom/client";
 import { ErrorBoundary } from "react-error-boundary";
 import RewriteLangTag from "@/components/i18n/RewriteLangTag";
 import ErrorComponent from "@/components/layout/ErrorComponent";
-import { parseArgs } from "@/stores/args";
 import App from "./App";
 import { commands } from "./bindings.gen";
 import "./index.scss";
 
 async function main() {
-  const args = await commands.getArgs();
-
-  const options = parseArgs(args as string[]);
-
-  if (options.mode === "send") {
-    if (!options.fileToSend) {
-      throw new Error("fileToSend is required in send mode");
-    }
-
-    if (!window.location.href.endsWith("/send")) {
-      window.location.href = "/send";
-    }
-  }
-
   if ((await commands.isAppHealthy()) === false) {
     location.href = "/error.html";
   }

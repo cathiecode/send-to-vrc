@@ -16,7 +16,8 @@
         "width": 540,
         "height": 720,
         "label": "main",
-        "backgroundColor": "#eeeeee"
+        "backgroundColor": "#eeeeee",
+        "url": "/launch.html"
       }
     ],
     "security": {
