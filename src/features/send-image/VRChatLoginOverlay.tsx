@@ -54,7 +54,13 @@ export default function VRChatLoginOverlay() {
       {localized("vrchat-login.please-login-to-vrchat")}
       <Spacer size="0.5em" />
       {showLoginForm ? (
-        <div>
+        <form
+          onSubmit={(ev) => {
+            ev.preventDefault();
+            dispatch({ type: "submit" });
+            return false;
+          }}
+        >
           <div
             css={css`
               display: grid;
@@ -68,6 +74,7 @@ export default function VRChatLoginOverlay() {
             </label>
             <Input
               type="text"
+              autoComplete="off"
               placeholder={localized("vrchat-login.username.placeholder")}
               value={state.username}
               readOnly={isUsernameAndPasswordReadOnly}
@@ -81,6 +88,7 @@ export default function VRChatLoginOverlay() {
             </label>
             <Input
               type="password"
+              autoComplete="off"
               placeholder={localized("vrchat-login.password.placeholder")}
               value={state.password}
               readOnly={isUsernameAndPasswordReadOnly}
@@ -99,15 +107,14 @@ export default function VRChatLoginOverlay() {
             `}
           >
             <Button
+              type="button"
               variant="secondary"
               onClick={() => dispatch({ type: "cancel" })}
             >
               {localized("vrchat-login.cancel")}
             </Button>
             <SpacerInline size="0.25em" />
-            <Button onClick={() => dispatch({ type: "submit" })}>
-              {localized("vrchat-login.login")}
-            </Button>
+            <Button>{localized("vrchat-login.login")}</Button>
             <SpacerInline size="1em" />
             <div
               css={css`
@@ -127,10 +134,16 @@ export default function VRChatLoginOverlay() {
               ) : null}
             </div>
           </div>
-        </div>
+        </form>
       ) : null}
       {showOtpForm ? (
-        <div>
+        <form
+          onSubmit={(ev) => {
+            ev.preventDefault();
+            dispatch({ type: "submitCode" });
+            return false;
+          }}
+        >
           {state.type === "emailOtp"
             ? localized("vrchat-login.otp.enter-from-email")
             : localized("vrchat-login.otp.enter-from-authenticator-app")}
@@ -148,6 +161,7 @@ export default function VRChatLoginOverlay() {
             </label>
             <Input
               type="text"
+              autoComplete="off"
               placeholder="OTP Code"
               value={state.code}
               id={otpCodeId}
@@ -164,15 +178,14 @@ export default function VRChatLoginOverlay() {
             `}
           >
             <Button
+              type="button"
               variant="secondary"
               onClick={() => dispatch({ type: "otpCancel" })}
             >
               {localized("vrchat-login.otp.cancel")}
             </Button>
             <SpacerInline size="0.5em" />
-            <Button onClick={() => dispatch({ type: "submitCode" })}>
-              {localized("vrchat-login.otp.verify")}
-            </Button>
+            <Button>{localized("vrchat-login.otp.verify")}</Button>
             <SpacerInline size="1em" />
             {state.totpCodeState === "loading" ? (
               <StatusLineComponent
@@ -186,7 +199,7 @@ export default function VRChatLoginOverlay() {
               />
             ) : null}
           </div>
-        </div>
+        </form>
       ) : null}
     </Overlay>
   );
