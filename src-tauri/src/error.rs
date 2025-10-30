@@ -15,6 +15,8 @@ pub enum AppError {
     UploaderAuthRequired(String),
     #[error("VRChat requires authentication.")]
     VrchatAuthRequired(String),
+    #[error("VRChat Print needs valid VRChat Plus subscription.")]
+    VrchatPlusRequired(String),
     #[error("Unknown error occurred.")]
     Unknown(String),
 }

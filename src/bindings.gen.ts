@@ -187,7 +187,7 @@ async resetConfig() : Promise<Result<null, AppError>> {
 
 /** user-defined types **/
 
-export type AppError = { type: "ConfigContents"; message: string } | { type: "ConfigExistance"; message: string } | { type: "ConfigDirectoryExistance"; message: string } | { type: "UploaderAuthRequired"; message: string } | { type: "VrchatAuthRequired"; message: string } | { type: "Unknown"; message: string }
+export type AppError = { type: "ConfigContents"; message: string } | { type: "ConfigExistance"; message: string } | { type: "ConfigDirectoryExistance"; message: string } | { type: "UploaderAuthRequired"; message: string } | { type: "VrchatAuthRequired"; message: string } | { type: "VrchatPlusRequired"; message: string } | { type: "Unknown"; message: string }
 export type LoginResult = { type: "Success" } | { type: "RequiresTwoFactorAuth"; content: TwoFactorMethod[] }
 export type NormalizedRect = { x1: number; y1: number; x2: number; y2: number }
 export type Tos = { version: number; content: string }

@@ -130,6 +130,12 @@ async fn send_file_to_print(
 
     debug!("Response: {:?}", response);
 
+    if response.status() == reqwest::StatusCode::FORBIDDEN {
+        return Err(AppError::VrchatPlusRequired(
+            "VRChat Plus subscription is required to use VRChat Print".to_string(),
+        ));
+    }
+
     if !response.status().is_success() {
         let text = response.text().await;
         // log::debug!("Response text: {:?}", text);
