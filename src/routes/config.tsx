@@ -80,7 +80,9 @@ function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
         <div>
           <Input id={uploaderApiKeyId} {...register("uploaderApiKey")} />
         </div>
-        <label htmlFor={vrchatApiKeyId}>{localized("upload")}</label>
+        <label htmlFor={vrchatApiKeyId}>
+          {localized("vrchat-login.api-key")}
+        </label>
         <div id={vrchatApiKeyId}>
           <div>{userName}</div>
           <Button
