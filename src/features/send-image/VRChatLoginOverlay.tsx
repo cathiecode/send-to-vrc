@@ -7,10 +7,12 @@ import Overlay from "@/components/ui/Overlay";
 import { Spacer } from "@/components/ui/Spacer";
 import SpacerInline from "@/components/ui/SpacerInline";
 import { useTaskRequestAtom } from "@/stores/task";
+import { useLocalized } from "@/i18n";
 import StatusLineComponent from "./StatusLineComponent";
 import { vrchatLoginAtom, vrchatLoginTaskAtom } from "./stores/vrchat-login";
 
 export default function VRChatLoginOverlay() {
+  const localized = useLocalized();
   const taskRequest = useTaskRequestAtom(vrchatLoginTaskAtom);
 
   const [state, dispatchLoginAction] = useAtom(vrchatLoginAtom);
@@ -49,7 +51,7 @@ export default function VRChatLoginOverlay() {
 
   return (
     <Overlay>
-      VRChatにログイン
+      {localized("vrchat-login.please-login-to-vrchat")}
       <Spacer size="0.5em" />
       {showLoginForm ? (
         <div>
@@ -61,10 +63,12 @@ export default function VRChatLoginOverlay() {
               gap: 0.5em;
             `}
           >
-            <label htmlFor={usernameId}>ユーザー名:</label>
+            <label htmlFor={usernameId}>
+              {localized("vrchat-login.username")}:
+            </label>
             <Input
               type="text"
-              placeholder="Username or Email"
+              placeholder={localized("vrchat-login.username.placeholder")}
               value={state.username}
               readOnly={isUsernameAndPasswordReadOnly}
               id={usernameId}
@@ -72,10 +76,12 @@ export default function VRChatLoginOverlay() {
                 dispatch({ type: "setUsername", username: e.target.value })
               }
             />
-            <label htmlFor={passwordId}>パスワード:</label>
+            <label htmlFor={passwordId}>
+              {localized("vrchat-login.password")}:
+            </label>
             <Input
               type="password"
-              placeholder="Password"
+              placeholder={localized("vrchat-login.password.placeholder")}
               value={state.password}
               readOnly={isUsernameAndPasswordReadOnly}
               id={passwordId}
@@ -96,11 +102,11 @@ export default function VRChatLoginOverlay() {
               variant="secondary"
               onClick={() => dispatch({ type: "cancel" })}
             >
-              キャンセル
+              {localized("vrchat-login.cancel")}
             </Button>
             <SpacerInline size="0.25em" />
             <Button onClick={() => dispatch({ type: "submit" })}>
-              ログイン
+              {localized("vrchat-login.login")}
             </Button>
             <SpacerInline size="1em" />
             <div
@@ -110,12 +116,12 @@ export default function VRChatLoginOverlay() {
             >
               {state.step === "loading" ? (
                 <StatusLineComponent
-                  statusText="ログインしています"
+                  statusText={localized("vrchat-login.status.logging-in")}
                   status="pending"
                 />
               ) : state.step === "error" ? (
                 <StatusLineComponent
-                  statusText="ログインに失敗しました。"
+                  statusText={localized("vrchat-login.status.failed")}
                   status="error"
                 />
               ) : null}
@@ -126,8 +132,8 @@ export default function VRChatLoginOverlay() {
       {showOtpForm ? (
         <div>
           {state.type === "emailOtp"
-            ? "メールで送信されたOTPコードを入力してください。"
-            : "認証アプリで生成されたOTPコードを入力してください。"}
+            ? localized("vrchat-login.otp.enter-from-email")
+            : localized("vrchat-login.otp.enter-from-authenticator-app")}
           <Spacer size="0.5em" />
           <div
             css={css`
@@ -137,7 +143,9 @@ export default function VRChatLoginOverlay() {
               gap: 0.5em;
             `}
           >
-            <label htmlFor={otpCodeId}>OTPコード:</label>
+            <label htmlFor={otpCodeId}>
+              {localized("vrchat-login.otp.code")}:
+            </label>
             <Input
               type="text"
               placeholder="OTP Code"
@@ -159,21 +167,21 @@ export default function VRChatLoginOverlay() {
               variant="secondary"
               onClick={() => dispatch({ type: "otpCancel" })}
             >
-              キャンセル
+              {localized("vrchat-login.otp.cancel")}
             </Button>
             <SpacerInline size="0.5em" />
             <Button onClick={() => dispatch({ type: "submitCode" })}>
-              検証
+              {localized("vrchat-login.otp.verify")}
             </Button>
             <SpacerInline size="1em" />
             {state.totpCodeState === "loading" ? (
               <StatusLineComponent
-                statusText="検証しています"
+                statusText={localized("vrchat-login.otp.status.verifying")}
                 status="pending"
               />
             ) : state.totpCodeState === "error" ? (
               <StatusLineComponent
-                statusText="検証に失敗しました"
+                statusText={localized("vrchat-login.otp.status.failed")}
                 status="error"
               />
             ) : null}

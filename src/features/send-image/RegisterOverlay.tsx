@@ -64,7 +64,9 @@ function RegisterOverlayContents() {
       <div>
         <div>{localized("send.tos.failed-to-load")}</div>
         <div>
-          <Button onClick={onRejectClick}>戻る</Button>
+          <Button onClick={onRejectClick}>
+            {localized("send.tos.failed-to-load.back")}
+          </Button>
         </div>
       </div>
     );

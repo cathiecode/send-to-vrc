@@ -31,6 +31,7 @@ type Inputs = {
 
 function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
   const { inputs, onSubmit } = props;
+  const localized = useLocalized();
 
   const {
     register,
@@ -49,15 +50,15 @@ function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
 
   const userName = (() => {
     if (vrchatCurrentUserName.state === "loading") {
-      return "読み込み中";
+      return localized("vrchat-login.username.status.loading-username");
     }
 
     if (vrchatCurrentUserName.state === "hasError") {
-      return "読み込みに失敗しました";
+      return localized("vrchat-login.username.status.error");
     }
 
     if (vrchatCurrentUserName.data === undefined) {
-      return "ログインしていません";
+      return localized("vrchat-login.username.status.not-logged-in");
     }
 
     return vrchatCurrentUserName.data;
@@ -73,11 +74,13 @@ function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
           line-height: 2em;
         `}
       >
-        <label htmlFor={uploaderApiKeyId}>アップローダーのAPIキー</label>
+        <label htmlFor={uploaderApiKeyId}>
+          {localized("send.uploader-api-key")}
+        </label>
         <div>
           <Input id={uploaderApiKeyId} {...register("uploaderApiKey")} />
         </div>
-        <label htmlFor={vrchatApiKeyId}>VRChatのAPIキー</label>
+        <label htmlFor={vrchatApiKeyId}>{localized("upload")}</label>
         <div id={vrchatApiKeyId}>
           <div>{userName}</div>
           <Button
@@ -85,7 +88,7 @@ function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
             variant="primary"
             onClick={() => vrchatLoginTask.request(console.log, console.error)}
           >
-            ログインする
+            {localized("vrchat-login.login")}
           </Button>
           <SpacerInline size="0.5em" />
           <Button
@@ -93,13 +96,13 @@ function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
             variant="secondary"
             onClick={() => vrchatLogoutTask.request(console.log, console.error)}
           >
-            ログアウトする
+            {localized("vrchat-login.logout")}
           </Button>
         </div>
       </div>
       {isDirty ? (
         <Button type="submit" disabled={!isDirty}>
-          保存
+          {localized("config.save-changes")}
         </Button>
       ) : null}
     </form>

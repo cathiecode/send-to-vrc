@@ -7,24 +7,30 @@
   </head>
 
   <body>
-    <h1>リカバリーモード</h1>
+    <h1>リカバリーモード Recovery Mode</h1>
     <p>
       アプリケーションが正常に動作していない場合は以下の設定を試すことができます。
+      You can try the following settings if the application is not working
+      properly.
     </p>
-    <button data-onclick="resetConfig">設定をリセット</button>
-    <a href="/"><button>アプリケーションに戻る</button></a>
+    <button data-onclick="resetConfig">設定をリセット Reset Settings</button>
+    <a href="/"><button>アプリケーションに戻る Back to application</button></a>
     <hr />
     <input
       id="config_key_to_read"
       type="text"
       placeholder="Config key to read"
     />
-    <button data-onclick="readConfigValue">コンフィグ値を読む</button>
+    <button data-onclick="readConfigValue">
+      コンフィグ値を読む Read config value
+    </button>
     <hr />
     <div>
       <input id="config_key_to_write" type="text" placeholder="Config key" />
       <input id="config_value" type="text" placeholder="Config value" />
-      <button data-onclick="writeConfigValue">コンフィグ値を上書き</button>
+      <button data-onclick="writeConfigValue">
+        コンフィグ値を上書き Overwrite config value
+      </button>
     </div>
     <pre style="background-color: #eee; padding: 1em" id="log">
         Failed to load recovery app.

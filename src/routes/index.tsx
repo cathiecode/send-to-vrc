@@ -79,7 +79,9 @@ function Index() {
             `}
           >
             <Link to="/config">
-              <Button variant="secondary">設定</Button>
+              <Button variant="secondary">
+                {localized("open-config-page")}
+              </Button>
             </Link>
           </div>
         </div>
