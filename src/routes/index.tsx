@@ -78,10 +78,8 @@ function Index() {
               margin-top: 1em;
             `}
           >
-            <Link to="/about">
-              <Button variant="secondary">
-                {localized("about.open-about-page")}
-              </Button>
+            <Link to="/config">
+              <Button variant="secondary">設定</Button>
             </Link>
           </div>
         </div>

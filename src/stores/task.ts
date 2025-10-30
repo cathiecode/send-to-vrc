@@ -1,7 +1,20 @@
-import { atom, useAtom } from "jotai";
+import { Getter, Setter, atom, useAtom } from "jotai";
 
-export function createTaskAtom<T>() {
-  return atom<TaskRequest<T> | undefined>();
+export function createTaskAtom<T>(option?: {
+  onTaskRequestCreated?: (get: Getter, set: Setter) => void;
+}) {
+  const baseAtom = atom<TaskRequest<T> | undefined>(undefined);
+
+  return atom(
+    (get) => get(baseAtom),
+    (get, set, taskRequest: TaskRequest<T> | undefined) => {
+      if (taskRequest) {
+        option?.onTaskRequestCreated?.(get, set);
+      }
+
+      set(baseAtom, taskRequest);
+    },
+  );
 }
 
 type TaskRequest<T> = {

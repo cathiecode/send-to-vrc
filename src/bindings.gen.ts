@@ -17,21 +17,24 @@ async openResourceDir() : Promise<Result<null, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
-async loadConfigFile() : Promise<Result<string, AppError>> {
+async readConfigValue(key: string) : Promise<Result<string | null, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("load_config_file") };
+    return { status: "ok", data: await TAURI_INVOKE("read_config_value", { key }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async saveConfigFile(contents: string) : Promise<Result<null, AppError>> {
+async writeConfigValue(key: string, value: string) : Promise<Result<null, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("save_config_file", { contents }) };
+    return { status: "ok", data: await TAURI_INVOKE("write_config_value", { key, value }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async isAppHealthy() : Promise<boolean> {
+    return await TAURI_INVOKE("is_app_healthy");
 },
 async getSystemLocale() : Promise<string> {
     return await TAURI_INVOKE("get_system_locale");
@@ -60,41 +63,49 @@ async uploadImageToImageServer(filePath: string, apiKey: string, uploaderBaseUrl
     else return { status: "error", error: e  as any };
 }
 },
-async uploadImageToVrchatPrint(filePath: string, vrchatApiKey: string) : Promise<Result<null, AppError>> {
+async uploadImageToVrchatPrint(filePath: string) : Promise<Result<null, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("upload_image_to_vrchat_print", { filePath, vrchatApiKey }) };
+    return { status: "ok", data: await TAURI_INVOKE("upload_image_to_vrchat_print", { filePath }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async login(username: string, password: string) : Promise<Result<LoginResult, AppError>> {
+async loginToVrchat(username: string, password: string) : Promise<Result<LoginResult, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("login", { username, password }) };
+    return { status: "ok", data: await TAURI_INVOKE("login_to_vrchat", { username, password }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async getCurrentUserName(authCookie: string) : Promise<Result<string, AppError>> {
+async loginToVrchatGetCurrentUserName() : Promise<Result<string, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_current_user_name", { authCookie }) };
+    return { status: "ok", data: await TAURI_INVOKE("login_to_vrchat_get_current_user_name") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async submitTotpCode(authCookie: string, totpCode: string) : Promise<Result<null, AppError>> {
+async loginToVrchatSubmitTotpCode(totpCode: string) : Promise<Result<null, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("submit_totp_code", { authCookie, totpCode }) };
+    return { status: "ok", data: await TAURI_INVOKE("login_to_vrchat_submit_totp_code", { totpCode }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async submitEmailOtpCode(authCookie: string, otpCode: string) : Promise<Result<null, AppError>> {
+async loginToVrchatSubmitEmailOtpCode(otpCode: string) : Promise<Result<null, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("submit_email_otp_code", { authCookie, otpCode }) };
+    return { status: "ok", data: await TAURI_INVOKE("login_to_vrchat_submit_email_otp_code", { otpCode }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async logoutFromVrchat() : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("logout_from_vrchat") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -147,6 +158,22 @@ async getCaptureUrlCommand(monitorId: string) : Promise<Result<string, string>> 
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async configFilePath() : Promise<Result<string, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("config_file_path") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async resetConfig() : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("reset_config") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -160,8 +187,8 @@ async getCaptureUrlCommand(monitorId: string) : Promise<Result<string, string>> 
 
 /** user-defined types **/
 
-export type AppError = { type: "ConfigContents"; message: string } | { type: "ConfigExistance"; message: string } | { type: "ConfigDirectoryExistance"; message: string } | { type: "UploaderAuthRequired"; message: string } | { type: "Unknown"; message: string }
-export type LoginResult = { Success: string } | { RequiresTwoFactorAuth: [string, TwoFactorMethod[]] }
+export type AppError = { type: "ConfigContents"; message: string } | { type: "ConfigExistance"; message: string } | { type: "ConfigDirectoryExistance"; message: string } | { type: "UploaderAuthRequired"; message: string } | { type: "VrchatAuthRequired"; message: string } | { type: "Unknown"; message: string }
+export type LoginResult = { type: "Success" } | { type: "RequiresTwoFactorAuth"; content: TwoFactorMethod[] }
 export type NormalizedRect = { x1: number; y1: number; x2: number; y2: number }
 export type Tos = { version: number; content: string }
 export type TwoFactorMethod = "Totp" | "EmailOtp" | { Unknown: string }

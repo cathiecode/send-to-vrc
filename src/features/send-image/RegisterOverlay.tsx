@@ -1,10 +1,11 @@
-import { useAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { css } from "@emotion/react";
 import Button from "@/components/ui/Button";
 import Overlay from "@/components/ui/Overlay";
-import { configAtom, registerRequestAtom } from "@/stores/atoms";
+import { registerRequestAtom } from "@/stores/atoms";
+import { uploaderApiKeyAtom, uploaderUrlBaseAtom } from "@/stores/config";
 import { useTaskRequestAtom } from "@/stores/task";
 import { commands } from "@/bindings.gen";
 import { useLocalized } from "@/i18n";
@@ -12,11 +13,12 @@ import StatusLineComponent from "./StatusLineComponent";
 
 function RegisterOverlayContents() {
   const taskRequest = useTaskRequestAtom(registerRequestAtom);
-  const [config, setConfig] = useAtom(configAtom);
   const localized = useLocalized();
+  const uploaderUrlBase = useAtomValue(uploaderUrlBaseAtom);
+  const setUploaderApiKey = useSetAtom(uploaderApiKeyAtom);
 
-  const { data: tos } = useSWR([config.uploaderUrlBase, "tos"], async () => {
-    return await commands.getTosAndVersion(config.uploaderUrlBase);
+  const { data: tos } = useSWR([uploaderUrlBase, "tos"], async () => {
+    return await commands.getTosAndVersion(uploaderUrlBase);
   });
 
   const tosContent = useMemo(() => {
@@ -36,7 +38,7 @@ function RegisterOverlayContents() {
 
     const result = await commands.registerAnonymously(
       tos.data.version,
-      config.uploaderUrlBase,
+      uploaderUrlBase,
     );
 
     if (result.status === "error") {
@@ -48,12 +50,10 @@ function RegisterOverlayContents() {
 
     const apiKey = result.data;
 
-    await setConfig({
-      uploaderApiKey: apiKey,
-    });
+    await setUploaderApiKey(apiKey);
 
     taskRequest?.resolve();
-  }, [tos, config.uploaderUrlBase, setConfig, taskRequest, localized]);
+  }, [tos, uploaderUrlBase, setUploaderApiKey, taskRequest, localized]);
 
   const onRejectClick = useCallback(() => {
     taskRequest?.reject(new Error(localized("send.tos.error.denied")));

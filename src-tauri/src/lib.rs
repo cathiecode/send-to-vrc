@@ -1,10 +1,11 @@
-use std::path::PathBuf;
 use tauri::Manager;
 use tauri_plugin_opener::OpenerExt;
 
 use crate::prelude::*;
-
+mod app_data;
 mod capture;
+mod config;
+mod crypt;
 mod error;
 mod file;
 mod image;
@@ -36,23 +37,27 @@ pub fn run() {
         .commands(tauri_specta::collect_commands![
             get_args,
             open_resource_dir,
-            load_config_file,
-            save_config_file,
+            read_config_value,
+            write_config_value,
+            is_app_healthy,
             get_system_locale,
             image::is_able_to_read_image_file,
             image_to_video::upload_image_to_video_server,
             image_to_image::upload_image_to_image_server,
             vrchat_print::upload_image_to_vrchat_print,
-            vrchat_print::login,
-            vrchat_print::get_current_user_name,
-            vrchat_print::submit_totp_code,
-            vrchat_print::submit_email_otp_code,
+            vrchat_print::login_to_vrchat,
+            vrchat_print::login_to_vrchat_get_current_user_name,
+            vrchat_print::login_to_vrchat_submit_totp_code,
+            vrchat_print::login_to_vrchat_submit_email_otp_code,
+            vrchat_print::logout_from_vrchat,
             uploader::register_anonymously,
             uploader::get_tos_and_version,
             capture::start_capture,
             capture::stop_capture,
             capture::finish_capture_with_cropped_rect,
-            capture::get_capture_url_command
+            capture::get_capture_url_command,
+            config::config_file_path,
+            config::reset_config,
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
@@ -65,6 +70,11 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(builder.invoke_handler())
+        .setup(|app| {
+            app.manage(app_data::AppData::new(app.handle().clone()));
+
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -73,6 +83,37 @@ pub fn run() {
 #[specta::specta]
 fn get_args() -> Vec<String> {
     std::env::args().collect()
+}
+
+#[tauri::command]
+#[specta::specta]
+fn read_config_value(handle: tauri::AppHandle, key: &str) -> Result<Option<String>, AppError> {
+    let app_handle = handle.state::<crate::app_data::AppData>();
+    let config = app_handle.lock_config();
+    Ok(config.get(key).map(|v| v.to_string()))
+}
+
+#[tauri::command]
+#[specta::specta]
+fn write_config_value(
+    handle: tauri::AppHandle,
+    key: String,
+    value: String,
+) -> Result<(), AppError> {
+    let app_handle = handle.state::<crate::app_data::AppData>();
+    let mut config = app_handle.lock_config();
+
+    config.set(key, value)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+fn is_app_healthy(handle: tauri::AppHandle) -> bool {
+    let app_data = handle.state::<crate::app_data::AppData>();
+
+    app_data.is_healthy()
 }
 
 #[tauri::command]
@@ -211,61 +252,6 @@ mod test {
         eprintln!("Result: {:?}", result);
         assert!(result.is_err());
     }
-}
-
-#[tauri::command]
-#[specta::specta]
-fn load_config_file(handle: tauri::AppHandle) -> Result<String, AppError> {
-    let config_path = config_file_path(handle)?;
-
-    if !config_path.exists() {
-        return Err(AppError::ConfigExistance(format!(
-            "Config file does not exist: {:?}",
-            config_path
-        )));
-    }
-
-    let contents = std::fs::read_to_string(&config_path).map_err(
-        AppError::from_error_with_message("Failed to read configuration file"),
-    )?;
-
-    Ok(contents)
-}
-
-#[tauri::command]
-#[specta::specta]
-fn save_config_file(handle: tauri::AppHandle, contents: &str) -> Result<(), AppError> {
-    let config_path = config_file_path(handle)?;
-
-    if let Some(parent) = config_path.parent() {
-        if !parent.exists() {
-            std::fs::create_dir_all(parent).map_err(AppError::from_error_with_message(
-                "Failed to create config directory",
-            ))?;
-        }
-    } else {
-        return Err(AppError::ConfigDirectoryExistance(
-            "Config file has no parent directory".to_string(),
-        ));
-    }
-
-    std::fs::write(&config_path, contents).map_err(AppError::from_error_with_message(
-        "Failed to write configuration file",
-    ))?;
-
-    Ok(())
-}
-
-fn config_file_path(handle: tauri::AppHandle) -> Result<PathBuf, AppError> {
-    let config_path = handle
-        .path()
-        .app_config_dir()
-        .map_err(AppError::from_error_with_message(
-            "Failed to get app config directory",
-        ))?
-        .join("config.json");
-
-    Ok(config_path)
 }
 
 #[tauri::command]

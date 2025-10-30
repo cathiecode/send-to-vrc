@@ -13,6 +13,8 @@ pub enum AppError {
     ConfigDirectoryExistance(String),
     #[error("Uploader requires authentication.")]
     UploaderAuthRequired(String),
+    #[error("VRChat requires authentication.")]
+    VrchatAuthRequired(String),
     #[error("Unknown error occurred.")]
     Unknown(String),
 }

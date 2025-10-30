@@ -1,59 +1,77 @@
-import z from "zod";
+import { WritableAtom, atom } from "jotai";
 import { commands } from "@/bindings.gen";
-import DEFAULT_CONFIG_JSON_URL from "../../public/default_config.json?url";
 
-const ConfigV1Schema = z.object({
-  version: z.literal(1),
-  copyOnUpload: z.boolean().default(true),
-  uploaderApiKey: z.string().optional(),
-  uploaderUrlBase: z.string(),
-  feature: z.record(z.string(), z.boolean()),
-  vrchatApiKey: z.string().or(z.null()).optional(),
-});
+const cacheInvalidateAtom = atom(0);
 
-const VersionedConfigSchema = z.union([ConfigV1Schema]);
+function readConfigAtom(key: string) {
+  return atom(
+    async (get) => {
+      const result = await commands.readConfigValue(key);
 
-const LatestConfigSchema = ConfigV1Schema;
+      if (result.status === "error") {
+        throw new Error("Failed to read config value: " + result.error);
+      }
 
-export type Config = z.infer<typeof LatestConfigSchema>;
+      get(cacheInvalidateAtom); // depend on cache invalidation
 
-export async function migrateConfig(
-  oldConfig: z.infer<typeof VersionedConfigSchema>,
-): Promise<Config> {
-  // TODO: Implement migration logic when there are multiple versions
-  return oldConfig;
-}
-
-export async function loadConfig(): Promise<Config> {
-  const loadConfigFileResult = await commands.loadConfigFile();
-
-  if (loadConfigFileResult.status === "error") {
-    if (loadConfigFileResult.error.type === "ConfigExistance") {
-      return LatestConfigSchema.parse(
-        await fetch(DEFAULT_CONFIG_JSON_URL).then((res) => res.json()),
-      );
-    }
-    throw new Error(
-      `設定ファイルの読み込みに失敗しました: ${loadConfigFileResult.error}`,
-    );
-  }
-
-  const versionedConfig = await VersionedConfigSchema.parseAsync(
-    JSON.parse(loadConfigFileResult.data),
+      return result.data ?? undefined;
+    },
+    async (_get, set, value: string) => {
+      await commands.writeConfigValue(key, value);
+      set(cacheInvalidateAtom, (c) => c + 1);
+    },
   );
-
-  const config = migrateConfig(versionedConfig);
-
-  return config;
 }
 
-export async function saveConfig(config: Config): Promise<void> {
-  const saveConfigFileResult = await commands.saveConfigFile(
-    JSON.stringify(config, null, 2),
+function withDefaultValue(
+  baseAtom: WritableAtom<Promise<string | undefined>, [string], Promise<void>>,
+  defaultValue: string,
+): WritableAtom<Promise<string>, [string], void> {
+  return atom(
+    async (get) => {
+      const v = await get(baseAtom);
+      return v === undefined ? defaultValue : v;
+    },
+    (_get, set, value: string) => {
+      set(baseAtom, value);
+    },
   );
-  if (saveConfigFileResult.status === "error") {
-    throw new Error(
-      `設定ファイルの保存に失敗しました: ${saveConfigFileResult.error}`,
-    );
-  }
 }
+
+const shouldCopyAfterUploadBaseAtom = readConfigAtom(
+  "should_copy_after_upload",
+);
+
+export const shouldCopyAfterUploadAtom = atom(
+  async (get) => (await get(shouldCopyAfterUploadBaseAtom)) === "true",
+  (_get, set, value: boolean) => {
+    set(shouldCopyAfterUploadBaseAtom, value ? "true" : "false");
+  },
+);
+
+const vrchatPrintFeatureFlagBaseAtom = readConfigAtom("feature_vrchat_print");
+
+export const vrchatPrintFeatureFlagAtom = atom(
+  async (get) => (await get(vrchatPrintFeatureFlagBaseAtom)) === "true",
+  (_get, set, value: boolean) => {
+    set(vrchatPrintFeatureFlagBaseAtom, value ? "true" : "false");
+  },
+);
+
+export const uploaderApiKeyAtom = readConfigAtom("uploader_api_key");
+
+export const uploaderUrlBaseAtom = withDefaultValue(
+  readConfigAtom("uploader_url_base"),
+  "https://s2v-upload.superneko.net",
+);
+
+// NOTE: This is dummy atom. The actual read/write is done in Rust code.
+export const vrchatApiKeyAtom = atom(
+  (get) => {
+    get(cacheInvalidateAtom); // depend on cache invalidation
+    return { __dummy: cacheInvalidateAtom };
+  },
+  (_get, set) => {
+    set(cacheInvalidateAtom, (c) => c + 1);
+  },
+);

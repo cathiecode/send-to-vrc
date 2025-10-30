@@ -23,6 +23,10 @@ async function main() {
     }
   }
 
+  if ((await commands.isAppHealthy()) === false) {
+    location.href = "/error.html";
+  }
+
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
       <Suspense fallback={null}>

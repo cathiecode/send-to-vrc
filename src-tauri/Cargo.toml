@@ -43,3 +43,5 @@ base64 = "0.22.1"
 urlencoding = "2.1.3"
 dotenvy = "0.15.7"
 env_logger = "0.11.8"
+windows = { version = "0.62.2", features = ["Win32_Security_Cryptography"] }
+ini = "1.3.0"

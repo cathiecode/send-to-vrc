@@ -1,14 +1,31 @@
 use base64::Engine as _;
 use image::GenericImageView as _;
+use tauri::Manager as _;
 
 use crate::prelude::*;
 
 #[tauri::command]
 #[specta::specta]
 pub async fn upload_image_to_vrchat_print(
+    app_handle: tauri::AppHandle,
     file_path: &str,
-    vrchat_api_key: String,
 ) -> Result<(), AppError> {
+    let Some(vrchat_api_key) = app_handle
+        .state::<crate::app_data::AppData>()
+        .lock_config()
+        .read_vrchat_api_key()?
+    else {
+        return Err(AppError::VrchatAuthRequired(
+            "VRChat API key is not set in configuration".to_string(),
+        ));
+    };
+
+    if vrchat_api_key.is_empty() {
+        return Err(AppError::VrchatAuthRequired(
+            "VRChat API key is empty in configuration".to_string(),
+        ));
+    };
+
     let path = std::path::Path::new(file_path);
 
     if !path.exists() {
@@ -135,25 +152,62 @@ pub enum TwoFactorMethod {
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, specta::Type)]
+#[serde(tag = "type", content = "content")]
 pub enum LoginResult {
-    Success(String),                                     // auth cookie
-    RequiresTwoFactorAuth(String, Vec<TwoFactorMethod>), // auth cookie
+    Success,                                     // auth cookie
+    RequiresTwoFactorAuth(Vec<TwoFactorMethod>), // auth cookie
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn get_current_user_name(auth_cookie: &str) -> Result<String, AppError> {
+pub async fn login_to_vrchat_get_current_user_name(
+    app_handle: tauri::AppHandle,
+) -> Result<String, AppError> {
+    let state = app_handle.state::<crate::app_data::AppData>();
+    let config = state.config();
+    login_to_vrchat_get_current_user_name_internal(config).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn login_to_vrchat_get_current_user_name_internal(
+    config: std::sync::Arc<std::sync::Mutex<crate::config::Config>>,
+) -> Result<String, AppError> {
     let client = reqwest::Client::new();
+
+    let Some(vrchat_api_key) = config.lock().unwrap().read_vrchat_api_key()? else {
+        return Err(AppError::VrchatAuthRequired(
+            "VRChat API key is not set in configuration".to_string(),
+        ));
+    };
+
+    if vrchat_api_key.is_empty() {
+        return Err(AppError::VrchatAuthRequired(
+            "VRChat API key is empty in configuration".to_string(),
+        ));
+    };
 
     let response = client
         .get("https://api.vrchat.cloud/api/1/auth/user")
-        .header("Cookie", format!("auth={}", auth_cookie))
+        .header(
+            "Cookie",
+            format!(
+                "auth={}",
+                config.lock().unwrap().read_vrchat_api_key()?.unwrap()
+            ),
+        )
         .header("User-Agent", "SendToVRC/1.0")
         .send()
         .await
         .map_err(AppError::from_error_with_message(
             "Failed to send get current user request",
         ))?;
+
+    if response.status() == reqwest::StatusCode::UNAUTHORIZED {
+        return Err(AppError::VrchatAuthRequired(
+            "VRChat API key is invalid or expired".to_string(),
+        ));
+    }
 
     if response.status() != reqwest::StatusCode::OK {
         return Err(AppError::Unknown(format!(
@@ -183,7 +237,22 @@ pub async fn get_current_user_name(auth_cookie: &str) -> Result<String, AppError
 
 #[tauri::command]
 #[specta::specta]
-pub async fn login(username: &str, password: &str) -> Result<LoginResult, AppError> {
+pub async fn login_to_vrchat(
+    app_handle: tauri::AppHandle,
+    username: &str,
+    password: &str,
+) -> Result<LoginResult, AppError> {
+    let state = app_handle.state::<crate::app_data::AppData>();
+    let config = state.config();
+    login_to_vrchat_internal(config, username, password).await
+}
+
+pub async fn login_to_vrchat_internal(
+    config: std::sync::Arc<std::sync::Mutex<crate::config::Config>>,
+    username: &str,
+    password: &str,
+) -> Result<LoginResult, AppError> {
+    info!("Logging in to VRChat as {}", username);
     let client = reqwest::Client::new();
 
     // base64(urlencode(username):urlencode(password))
@@ -226,7 +295,9 @@ pub async fn login(username: &str, password: &str) -> Result<LoginResult, AppErr
     // Successful login (without 2FA)
     if response_json.get("displayName").is_some() {
         if let Some(cookie) = auth_cookie {
-            return Ok(LoginResult::Success(cookie));
+            config.lock().unwrap().write_vrchat_api_key(&cookie)?;
+            // config.write_vrchat_api_key(&cookie)?;
+            return Ok(LoginResult::Success);
         }
 
         return Err(AppError::Unknown(
@@ -253,10 +324,8 @@ pub async fn login(username: &str, password: &str) -> Result<LoginResult, AppErr
         );
 
         if let Some(cookie) = auth_cookie {
-            return Ok(LoginResult::RequiresTwoFactorAuth(
-                cookie,
-                two_factor_methods,
-            ));
+            config.lock().unwrap().write_vrchat_api_key(&cookie)?;
+            return Ok(LoginResult::RequiresTwoFactorAuth(two_factor_methods));
         }
 
         return Err(AppError::Unknown(
@@ -271,7 +340,30 @@ pub async fn login(username: &str, password: &str) -> Result<LoginResult, AppErr
 
 #[tauri::command]
 #[specta::specta]
-pub async fn submit_totp_code(auth_cookie: &str, totp_code: &str) -> Result<(), AppError> {
+pub async fn login_to_vrchat_submit_totp_code(
+    app_handle: tauri::AppHandle,
+    totp_code: &str,
+) -> Result<(), AppError> {
+    let vrchat_api_key = {
+        let state = app_handle.state::<crate::app_data::AppData>();
+        let config = state.lock_config();
+
+        let Some(vrchat_api_key) = config.read_vrchat_api_key()? else {
+            return Err(AppError::VrchatAuthRequired(
+                "VRChat API key is not set in configuration".to_string(),
+            ));
+        };
+
+        vrchat_api_key
+    };
+
+    login_to_vrchat_submit_totp_code_internal(vrchat_api_key, totp_code).await
+}
+
+pub async fn login_to_vrchat_submit_totp_code_internal(
+    auth_cookie: String,
+    totp_code: &str,
+) -> Result<(), AppError> {
     let client = reqwest::Client::new();
 
     let response = client
@@ -311,7 +403,30 @@ pub async fn submit_totp_code(auth_cookie: &str, totp_code: &str) -> Result<(), 
 
 #[tauri::command]
 #[specta::specta]
-pub async fn submit_email_otp_code(auth_cookie: &str, otp_code: &str) -> Result<(), AppError> {
+pub async fn login_to_vrchat_submit_email_otp_code(
+    app_handle: tauri::AppHandle,
+    otp_code: &str,
+) -> Result<(), AppError> {
+    let vrchat_api_key = {
+        let state = app_handle.state::<crate::app_data::AppData>();
+        let config = state.lock_config();
+
+        let Some(vrchat_api_key) = config.read_vrchat_api_key()? else {
+            return Err(AppError::VrchatAuthRequired(
+                "VRChat API key is not set in configuration".to_string(),
+            ));
+        };
+
+        vrchat_api_key
+    };
+
+    login_to_vrchat_submit_email_otp_code_internal(vrchat_api_key, otp_code).await
+}
+
+pub async fn login_to_vrchat_submit_email_otp_code_internal(
+    auth_cookie: String,
+    otp_code: &str,
+) -> Result<(), AppError> {
     let client = reqwest::Client::new();
 
     let response = client
@@ -349,6 +464,44 @@ pub async fn submit_email_otp_code(auth_cookie: &str, otp_code: &str) -> Result<
     Ok(())
 }
 
+#[tauri::command]
+#[specta::specta]
+pub async fn logout_from_vrchat(app_handle: tauri::AppHandle) -> Result<(), AppError> {
+    let state = app_handle.state::<crate::app_data::AppData>();
+    let config = state.config();
+
+    let Some(api_key) = config.lock().unwrap().read_vrchat_api_key()? else {
+        return Ok(());
+    };
+
+    if api_key.is_empty() {
+        return Ok(());
+    };
+
+    config.lock().unwrap().write_vrchat_api_key("")?;
+
+    let client = reqwest::Client::new();
+
+    let response = client
+        .put("https://api.vrchat.cloud/api/1/logout")
+        .header("Cookie", format!("auth={}", api_key))
+        .header("User-Agent", "SendToVRC/1.0")
+        .send()
+        .await
+        .map_err(AppError::from_error_with_message(
+            "Failed to send logout request",
+        ))?;
+
+    if response.status() != reqwest::StatusCode::OK {
+        return Err(AppError::Unknown(format!(
+            "Logout failed with status code: {}",
+            response.status()
+        )));
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     #[tokio::test]
@@ -362,16 +515,33 @@ mod tests {
         let password = std::env::var("TEST_VRCHAT_PASSWORD").unwrap();
         let totp_code = std::env::var("TEST_VRCHAT_TOTP_CODE").unwrap();
 
-        let result = super::login(&username, &password).await;
+        let config = std::sync::Arc::new(std::sync::Mutex::new(
+            crate::config::Config::new(std::path::PathBuf::from("test_config.ini")).unwrap(),
+        ));
+
+        let result = super::login_to_vrchat_internal(config.clone(), &username, &password).await;
         assert!(result.is_ok());
 
-        if let super::LoginResult::RequiresTwoFactorAuth(auth_cookie, methods) = result.unwrap() {
+        if let super::LoginResult::RequiresTwoFactorAuth(methods) = result.unwrap() {
             assert!(methods.contains(&super::TwoFactorMethod::Totp));
 
-            let totp_result = super::submit_totp_code(&auth_cookie, &totp_code).await;
+            let vrchat_api_key = config
+                .lock()
+                .unwrap()
+                .read_vrchat_api_key()
+                .unwrap()
+                .unwrap();
+
+            let totp_result = super::login_to_vrchat_submit_totp_code_internal(
+                vrchat_api_key.clone(),
+                &totp_code,
+            )
+            .await;
             assert!(totp_result.is_ok());
 
-            let user_name = super::get_current_user_name(&auth_cookie).await.unwrap();
+            let user_name = super::login_to_vrchat_get_current_user_name_internal(config)
+                .await
+                .unwrap();
 
             println!("Logged in as {}", user_name);
         } else {
@@ -389,10 +559,14 @@ mod tests {
         let username = std::env::var("TEST_VRCHAT_USERNAME").unwrap();
         let password = std::env::var("TEST_VRCHAT_PASSWORD").unwrap();
 
-        let result = super::login(&username, &password).await;
+        let config = std::sync::Arc::new(std::sync::Mutex::new(
+            crate::config::Config::new(std::path::PathBuf::from("test_config.ini")).unwrap(),
+        ));
+
+        let result = super::login_to_vrchat_internal(config.clone(), &username, &password).await;
         assert!(result.is_ok());
 
-        if let super::LoginResult::RequiresTwoFactorAuth(auth_cookie, methods) = result.unwrap() {
+        if let super::LoginResult::RequiresTwoFactorAuth(methods) = result.unwrap() {
             assert!(methods.contains(&super::TwoFactorMethod::EmailOtp));
 
             println!("Waiting 60 seconds to receive email OTP code... Please Write TEST_VRCHAT_EMAIL_OTP_CODE env var before continuing.");
@@ -402,10 +576,23 @@ mod tests {
 
             let otp_code = std::env::var("TEST_VRCHAT_EMAIL_OTP_CODE").unwrap();
 
-            let otp_result = super::submit_email_otp_code(&auth_cookie, &otp_code).await;
+            let vrchat_api_key = config
+                .lock()
+                .unwrap()
+                .read_vrchat_api_key()
+                .unwrap()
+                .unwrap();
+
+            let otp_result = super::login_to_vrchat_submit_email_otp_code_internal(
+                vrchat_api_key.clone(),
+                &otp_code,
+            )
+            .await;
             assert!(otp_result.is_ok());
 
-            let user_name = super::get_current_user_name(&auth_cookie).await.unwrap();
+            let user_name = super::login_to_vrchat_get_current_user_name_internal(config)
+                .await
+                .unwrap();
 
             log::info!("Logged in as {}", user_name);
         } else {

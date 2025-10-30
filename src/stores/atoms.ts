@@ -1,11 +1,15 @@
 import { atom } from "jotai";
-import { atomWithRefresh } from "jotai/utils";
 import { invoke } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { vrchatLoginTaskAtom } from "@/features/send-image/stores/vrchat-login";
 import router from "@/stores/router";
 import { commands } from "@/bindings.gen";
 import { parseArgs } from "./args";
-import { Config, loadConfig, saveConfig } from "./config";
+import {
+  shouldCopyAfterUploadAtom,
+  uploaderApiKeyAtom,
+  uploaderUrlBaseAtom,
+} from "./config";
 import { createTaskAtom } from "./task";
 
 let cachedArgs: string[] | null = null;
@@ -119,9 +123,8 @@ export const sendImageToVideoPlayerAtom = atom(
 
     try {
       for (let i = 0; i < 3; i++) {
-        const config = await get(configAtom);
-        const apiKey = config.uploaderApiKey;
-        const baseUrl = config.uploaderUrlBase;
+        const apiKey = await get(uploaderApiKeyAtom);
+        const baseUrl = await get(uploaderUrlBaseAtom);
 
         if (apiKey === undefined) {
           // TODO
@@ -154,7 +157,7 @@ export const sendImageToVideoPlayerAtom = atom(
 
         const url = result.data;
 
-        if (get(shouldCopyAfterUploadAtom)) {
+        if (await get(shouldCopyAfterUploadAtom)) {
           await writeText(url);
         }
 
@@ -178,13 +181,6 @@ export const sendImageToVideoPlayerAtom = atom(
   },
 );
 
-export const shouldCopyAfterUploadAtom = atom(
-  (get) => mapPromise(get(configAtom), (c) => c.copyOnUpload),
-  async (_get, set, v: boolean) => {
-    set(configAtom, { copyOnUpload: v });
-  },
-);
-
 export const sendImageToImageViewerAtom = atom(
   null,
   async (get, set, filePath: string) => {
@@ -195,9 +191,8 @@ export const sendImageToImageViewerAtom = atom(
 
     try {
       for (let i = 0; i < 3; i++) {
-        const config = await get(configAtom);
-        const apiKey = config.uploaderApiKey;
-        const baseUrl = config.uploaderUrlBase;
+        const apiKey = await get(uploaderApiKeyAtom);
+        const baseUrl = await get(uploaderUrlBaseAtom);
 
         if (apiKey === undefined) {
           // TODO
@@ -230,7 +225,7 @@ export const sendImageToImageViewerAtom = atom(
 
         const url = result.data;
 
-        if (get(shouldCopyAfterUploadAtom)) {
+        if (await get(shouldCopyAfterUploadAtom)) {
           await writeText(url);
         }
 
@@ -256,7 +251,7 @@ export const sendImageToImageViewerAtom = atom(
 
 export const sendImageToVRChatPrintAtom = atom(
   null,
-  async (get, set, filePath: string) => {
+  async (_get, set, filePath: string) => {
     set(sendStateAtom, {
       mode: "vrchat_print",
       state: { status: "uploading" },
@@ -264,23 +259,19 @@ export const sendImageToVRChatPrintAtom = atom(
 
     try {
       for (let i = 0; i < 3; i++) {
-        const config = await get(configAtom);
-        const vrchatApiKey = config.vrchatApiKey ?? undefined;
-
-        if (vrchatApiKey === undefined) {
-          throw new Error(
-            "VRChat APIキーが設定されていません。configのvrchatApiKeyに設定してください。",
-          );
-        }
-
-        const result = await commands.uploadImageToVrchatPrint(
-          filePath,
-          vrchatApiKey,
-        );
+        const result = await commands.uploadImageToVrchatPrint(filePath);
 
         if (result.status === "error") {
+          if (result.error.type === "VrchatAuthRequired") {
+            await new Promise((resolve, reject) =>
+              set(vrchatLoginTaskAtom, { resolve, reject }),
+            );
+
+            continue; // Retry
+          }
+
           throw new Error(
-            `アップロードに失敗しました: ${result.error.type} ${result.error.message}`,
+            `アップロードに失敗しました: ${result.error.type}: ${result.error.message}`,
           );
         }
 
@@ -305,38 +296,6 @@ export const sendImageToVRChatPrintAtom = atom(
 );
 
 export const registerRequestAtom = createTaskAtom<void>();
-
-let configCache: Config | null = null;
-
-const configValueAtom = atomWithRefresh<Config | Promise<Config>>(() => {
-  if (!configCache) {
-    return (async () => {
-      configCache = await loadConfig();
-
-      return configCache;
-    })();
-  }
-  return configCache;
-});
-
-export const configAtom = atom(
-  (get) => {
-    return get(configValueAtom);
-  },
-  async (get, set, partialConfig: Partial<Config>) => {
-    const oldConfig = await get(configAtom);
-
-    configCache = { ...oldConfig, ...partialConfig };
-
-    await saveConfig(configCache);
-
-    set(configValueAtom);
-  },
-);
-
-export const vrchatPrintFeatureFlagAtom = atom((get) =>
-  mapPromise(get(configAtom), (c) => c.feature?.["vrchat-print"] ?? false),
-);
 
 function mapPromise<T, U>(v: T | Promise<T>, map: (v: T) => U): U | Promise<U> {
   if (v instanceof Promise) {

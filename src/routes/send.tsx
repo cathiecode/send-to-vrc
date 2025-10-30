@@ -12,9 +12,11 @@ import {
   sendImageToVideoPlayerAtom,
   sendStateAtom,
   setFileToSendAtom,
+} from "@/stores/atoms";
+import {
   shouldCopyAfterUploadAtom,
   vrchatPrintFeatureFlagAtom,
-} from "@/stores/atoms";
+} from "@/stores/config";
 import { useLocalized } from "@/i18n";
 
 export const Route = createFileRoute("/send")({

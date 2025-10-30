@@ -1,25 +1,7 @@
 let RECOVERY = {
   async resetConfig() {
-    const contentsResponse = await fetch("/default_config.json");
-
-    if (!contentsResponse.ok) {
-      this.log("Failed to fetch default config");
-      return;
-    }
-
-    const contents = await contentsResponse.text();
-
-    if (!contents) {
-      this.log("Default config is empty; something is very wrong");
-      return;
-    }
-
-    this.log("Resetting config to default");
-    this.log("New config contents:");
-    this.log(contents);
-
     try {
-      await window.__TAURI__.core.invoke("save_config_file", { contents });
+      await window.__TAURI__.core.invoke("reset_config");
     } catch (e) {
       this.log("Failed to save config file: " + e);
       return;
@@ -27,43 +9,41 @@ let RECOVERY = {
 
     this.log("Config reset; please restart the application.");
   },
-  async outputConfig() {
-    this.log("Fetching config file...");
-    try {
-      const contents = await window.__TAURI__.core.invoke("load_config_file");
+  async readConfigValue() {
+    const key = document.querySelector("input#config_key_to_read").value;
 
-      this.log("Config file contents:");
-      this.log(contents);
-      console.log(contents);
+    let value;
+
+    try {
+      value = await window.__TAURI__.core.invoke("read_config_value", {
+        key: key,
+      });
     } catch (e) {
-      this.log("Failed to load config file: " + e);
+      this.log("Failed to read config value: " + e);
       return;
+    }
+
+    if (value === null || value === undefined) {
+      this.log(`Config key "${key}" is not set.`);
+    } else {
+      this.log(`Config value for "${key}": ${value}`);
     }
   },
-  async overwriteConfig() {
-    const textarea = document.getElementById("config");
-    if (!(textarea instanceof HTMLTextAreaElement)) {
-      this.log("Failed to find config textarea");
-      return;
-    }
-
-    const contents = textarea.value;
-    if (!contents) {
-      this.log("Config textarea is empty; not overwriting");
-      return;
-    }
-
-    this.log("Overwriting config with contents:");
-    this.log(contents);
+  async writeConfigValue() {
+    const key = document.querySelector("input#config_key_to_write").value;
+    const value = document.querySelector("input#config_value").value;
 
     try {
-      await window.__TAURI__.core.invoke("save_config_file", { contents });
+      await window.__TAURI__.core.invoke("write_config_value", {
+        key: key,
+        value: value,
+      });
     } catch (e) {
-      this.log("Failed to save config file: " + e);
+      this.log("Failed to write config value: " + e);
       return;
     }
 
-    this.log("Config overwritten; please restart the application.");
+    this.log(`Config value for "${key}" set to "${value}".`);
   },
   log(message) {
     console.log(message);
@@ -80,4 +60,5 @@ document.querySelectorAll("[data-onclick]").forEach((el) => {
   }
 });
 
+document.getElementById("log").innerText = "";
 RECOVERY.log("Recovery mode initialized.");
