@@ -75,3 +75,5 @@ export const vrchatApiKeyAtom = atom(
     set(cacheInvalidateAtom, (c) => c + 1);
   },
 );
+
+export const configuredLangAtom = readConfigAtom("language");

@@ -2,6 +2,7 @@ import { atom, useAtomValue } from "jotai";
 import { atomWithCache } from "jotai-cache";
 import { match } from "@formatjs/intl-localematcher";
 import { commands } from "./bindings.gen";
+import { configuredLangAtom } from "./stores/config";
 
 async function availableLangs(): Promise<string[]> {
   const res = await fetch("/translation/available.json");
@@ -46,10 +47,30 @@ export const systemLangAtom = atom(async () => {
   return systemLang;
 });
 
+export const availableLangsAtom = atom(async () => {
+  return await availableLangs();
+});
+
 export const currentLangAtom = atom(async (get) => {
   const systemLang = (await get(systemLangAtom)) ?? "en";
 
-  const availableSystemLang = match([systemLang], await availableLangs(), "en");
+  const availableSystemLang = match(
+    [systemLang],
+    await get(availableLangsAtom),
+    "en",
+  );
+
+  const configuredLang = await get(configuredLangAtom);
+
+  if (configuredLang !== undefined && configuredLang !== "SYSTEM") {
+    const availableConfiguredLang = match(
+      [configuredLang],
+      await get(availableLangsAtom),
+      availableSystemLang,
+    );
+
+    return availableConfiguredLang;
+  }
 
   return availableSystemLang;
 });

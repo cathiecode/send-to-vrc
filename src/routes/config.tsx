@@ -8,6 +8,7 @@ import AppLayout from "@/components/layout/AppContainer";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import { Spacer } from "@/components/ui/Spacer";
 import SpacerInline from "@/components/ui/SpacerInline";
 import {
@@ -15,7 +16,7 @@ import {
   vrchatLoginTaskAtom,
   vrchatLogoutTaskAtom,
 } from "@/features/send-image/stores/vrchat-login";
-import { uploaderApiKeyAtom } from "@/stores/config";
+import { configuredLangAtom, uploaderApiKeyAtom } from "@/stores/config";
 import { useTaskRequestAtom } from "@/stores/task";
 import { useLocalized } from "@/i18n";
 
@@ -27,6 +28,7 @@ const vrchatCurrentUserNameLoadable = loadable(vrchatCurrentUserNameAtom);
 
 type Inputs = {
   uploaderApiKey: string;
+  configuredLanguage: string;
 };
 
 function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
@@ -47,6 +49,7 @@ function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
 
   const uploaderApiKeyId = useId();
   const vrchatApiKeyId = useId();
+  const languageId = useId();
 
   const userName = (() => {
     if (vrchatCurrentUserName.state === "loading") {
@@ -101,7 +104,16 @@ function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
             {localized("vrchat-login.logout")}
           </Button>
         </div>
+        <label htmlFor={languageId}>Language</label>
+        <div>
+          <Select id={languageId} {...register("configuredLanguage")}>
+            <option value="SYSTEM">System Default</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+          </Select>
+        </div>
       </div>
+      <Spacer size="0.5em" />
       {isDirty ? (
         <Button type="submit" disabled={!isDirty}>
           {localized("config.save-changes")}
@@ -113,23 +125,29 @@ function Config(props: { inputs: Inputs; onSubmit: (data: Inputs) => void }) {
 
 function RouteComponent() {
   const [uploaderApiKey, setUploaderApiKey] = useAtom(uploaderApiKeyAtom);
+  const [configuredLanguage, setConfiguredLanguage] =
+    useAtom(configuredLangAtom);
   const localized = useLocalized();
 
   const inputs = {
     uploaderApiKey: uploaderApiKey ?? "",
+    configuredLanguage: configuredLanguage ?? "SYSTEM",
   };
+
+  const inputKey = JSON.stringify(inputs);
 
   const onSubmit: SubmitHandler<Inputs> = useCallback(
     (data) => {
       setUploaderApiKey(data.uploaderApiKey);
+      setConfiguredLanguage(data.configuredLanguage);
     },
-    [setUploaderApiKey],
+    [setConfiguredLanguage, setUploaderApiKey],
   );
 
   return (
     <AppLayout>
       <Container>
-        <Config inputs={inputs} onSubmit={onSubmit} />
+        <Config key={inputKey} inputs={inputs} onSubmit={onSubmit} />
         <Spacer size="0.5em" />
         <Link to="/about">
           <Button variant="secondary">
