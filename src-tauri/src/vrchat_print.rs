@@ -130,6 +130,12 @@ async fn send_file_to_print(
 
     debug!("Response: {:?}", response);
 
+    if response.status() == reqwest::StatusCode::UNAUTHORIZED {
+        return Err(AppError::VrchatAuthRequired(
+            "VRChat API key is invalid or expired".to_string(),
+        ));
+    }
+
     if response.status() == reqwest::StatusCode::FORBIDDEN {
         return Err(AppError::VrchatPlusRequired(
             "VRChat Plus subscription is required to use VRChat Print".to_string(),
