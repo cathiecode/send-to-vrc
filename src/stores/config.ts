@@ -43,7 +43,8 @@ const shouldCopyAfterUploadBaseAtom = readConfigAtom(
 );
 
 export const shouldCopyAfterUploadAtom = atom(
-  async (get) => (await get(shouldCopyAfterUploadBaseAtom)) === "true",
+  async (get) =>
+    ((await get(shouldCopyAfterUploadBaseAtom)) ?? "true") === "true",
   (_get, set, value: boolean) => {
     set(shouldCopyAfterUploadBaseAtom, value ? "true" : "false");
   },
