@@ -13,10 +13,7 @@ import {
   sendStateAtom,
   setFileToSendAtom,
 } from "@/stores/atoms";
-import {
-  shouldCopyAfterUploadAtom,
-  vrchatPrintFeatureFlagAtom,
-} from "@/stores/config";
+import { shouldCopyAfterUploadAtom } from "@/stores/config";
 import { useLocalized } from "@/i18n";
 
 export const Route = createFileRoute("/send")({
@@ -83,8 +80,6 @@ function SendPage() {
     shouldCopyAfterUploadAtom,
   );
 
-  const vrchatPrintFeatureFlag = useAtomValue(vrchatPrintFeatureFlagAtom);
-
   return (
     <AppLayout>
       <SendPageComponent
@@ -93,7 +88,6 @@ function SendPage() {
         imageFileSrc={imageFileSrc}
         imageValidity={imageValidity}
         shouldCopyAfterUpload={shouldCopyAfterUpload}
-        vrchatPrint={vrchatPrintFeatureFlag}
         onFilePicked={onFilePicked}
         onSendToImageViewerClicked={onSendToImageViewerClicked}
         onSendToVideoPlayerClicked={onSendToVideoPlayerClicked}

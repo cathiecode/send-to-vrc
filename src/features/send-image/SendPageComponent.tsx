@@ -23,7 +23,6 @@ type SendPageComponentProps = {
   imageFileSrc: string | undefined;
   imageValidity: "valid" | "invalid" | "pending";
   shouldCopyAfterUpload: boolean;
-  vrchatPrint: boolean;
   onFilePicked: (filePath: string | undefined) => void;
   onSendToVideoPlayerClicked: () => void;
   onSendToImageViewerClicked: () => void;
@@ -37,7 +36,6 @@ export default function SendPageComponent(props: SendPageComponentProps) {
     pickedFilePath,
     imageFileSrc,
     imageValidity,
-    vrchatPrint,
     onFilePicked,
     onSendToImageViewerClicked,
     onSendToVideoPlayerClicked,
@@ -196,15 +194,13 @@ export default function SendPageComponent(props: SendPageComponentProps) {
             onClick={onSendToImageViewerClicked}
             disabled={imageValidity !== "valid"}
           />
-          {vrchatPrint ? (
-            <ButtonCard
-              icon={<TbPrinter />}
-              title={localized("send.print-to-vrchat-print")}
-              description={localized("send.print-to-vrchat-print.description")}
-              onClick={onSendToVrchatPrintClicked}
-              disabled={imageValidity !== "valid"}
-            />
-          ) : null}
+          <ButtonCard
+            icon={<TbPrinter />}
+            title={localized("send.print-to-vrchat-print")}
+            description={localized("send.print-to-vrchat-print.description")}
+            onClick={onSendToVrchatPrintClicked}
+            disabled={imageValidity !== "valid"}
+          />
         </div>
       </div>
     </div>

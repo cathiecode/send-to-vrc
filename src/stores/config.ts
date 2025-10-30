@@ -49,15 +49,6 @@ export const shouldCopyAfterUploadAtom = atom(
   },
 );
 
-const vrchatPrintFeatureFlagBaseAtom = readConfigAtom("feature_vrchat_print");
-
-export const vrchatPrintFeatureFlagAtom = atom(
-  async (get) => (await get(vrchatPrintFeatureFlagBaseAtom)) === "true",
-  (_get, set, value: boolean) => {
-    set(vrchatPrintFeatureFlagBaseAtom, value ? "true" : "false");
-  },
-);
-
 export const uploaderApiKeyAtom = readConfigAtom("uploader_api_key");
 
 export const uploaderUrlBaseAtom = withDefaultValue(
