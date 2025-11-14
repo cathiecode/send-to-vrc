@@ -144,11 +144,16 @@ fn capture_thread(
     }
 }
 
+pub fn init_capture_thread(app_handle: AppHandle) {
+    CAPTURE_THREAD_REQUEST_SENDER.get_or_init(|| create_capture_thread(app_handle));
+}
+
 #[tauri::command]
 #[specta::specta]
-pub fn start_capture(app_handle: AppHandle) -> Result<(), String> {
-    let sender =
-        CAPTURE_THREAD_REQUEST_SENDER.get_or_init(|| create_capture_thread(app_handle.clone()));
+pub fn start_capture() -> Result<(), String> {
+    let Some(sender) = CAPTURE_THREAD_REQUEST_SENDER.get() else {
+        return Err("Capture thread is not initialized".to_string());
+    };
 
     sender
         .send(CaptureThreadRequest::Start)
@@ -159,9 +164,10 @@ pub fn start_capture(app_handle: AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 #[specta::specta]
-pub fn stop_capture(app_handle: AppHandle) -> Result<(), String> {
-    let sender =
-        CAPTURE_THREAD_REQUEST_SENDER.get_or_init(|| create_capture_thread(app_handle.clone()));
+pub fn stop_capture() -> Result<(), String> {
+    let Some(sender) = CAPTURE_THREAD_REQUEST_SENDER.get() else {
+        return Err("Capture thread is not initialized".to_string());
+    };
 
     sender
         .send(CaptureThreadRequest::Quit)
@@ -248,7 +254,7 @@ pub fn finish_capture_with_cropped_rect(
         .save(&result_path)
         .map_err(|e| format!("Failed to save cropped image: {e}"))?;
 
-    stop_capture(app_handle.clone())?;
+    stop_capture()?;
 
     app_handle
         .emit("send_request", result_path.to_string_lossy().to_string())

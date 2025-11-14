@@ -73,6 +73,8 @@ pub fn run() {
         .setup(|app| {
             app.manage(app_data::AppData::new(app.handle().clone()));
 
+            capture::init_capture_thread(app.handle().clone());
+
             Ok(())
         })
         .run(tauri::generate_context!())
