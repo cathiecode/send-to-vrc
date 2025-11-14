@@ -15,7 +15,12 @@ pub fn create_capture_thread(app_handle: AppHandle) -> Sender<CaptureThreadReque
     let (tx, rx) = tokio::sync::broadcast::channel::<CaptureThreadRequest>(10);
 
     std::thread::spawn(move || {
-        capture_thread(app_handle, rx).unwrap();
+        let result = capture_thread(app_handle, rx);
+
+        match result {
+            Ok(_) => info!("Capture thread exited normally"),
+            Err(e) => error!("Capture thread exited with error: {}", e),
+        };
     });
 
     tx

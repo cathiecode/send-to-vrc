@@ -1,3 +1,3 @@
 pub use crate::error::AppError;
 pub(crate) use crate::progress;
-pub use log::{debug, info};
+pub use log::{debug, error, info, warn};

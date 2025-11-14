@@ -79,6 +79,23 @@ function RouteComponent() {
       .catch(console.error);
   }, [webviewWidowLabel, boundingClientRect, boundingRectInRootCssPixel]);
 
+  const onSendFullScreenClicked = useCallback(() => {
+    if (!webviewWidowLabel) {
+      return;
+    }
+
+    const rect = {
+      x1: 0,
+      y1: 0,
+      x2: 1,
+      y2: 1,
+    };
+
+    commands
+      .finishCaptureWithCroppedRect(webviewWidowLabel, rect)
+      .catch(console.error);
+  }, [webviewWidowLabel]);
+
   return (
     <div>
       <div
@@ -110,6 +127,9 @@ function RouteComponent() {
             }}
           >
             Stop capture
+          </Button>
+          <Button variant="secondary" onClick={onSendFullScreenClicked}>
+            Send full screen
           </Button>
         </div>
         <BoundingSelector
