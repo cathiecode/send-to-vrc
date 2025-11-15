@@ -41,6 +41,7 @@ pub fn run() {
             write_config_value,
             is_app_healthy,
             get_system_locale,
+            kill,
             image::is_able_to_read_image_file,
             image_to_video::upload_image_to_video_server,
             image_to_image::upload_image_to_image_server,
@@ -136,6 +137,12 @@ fn open_resource_dir(handle: tauri::AppHandle) -> Result<(), AppError> {
         ))?;
 
     Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+fn kill() {
+    std::process::exit(1);
 }
 
 #[cfg(test)]

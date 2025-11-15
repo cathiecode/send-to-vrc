@@ -39,6 +39,9 @@ async isAppHealthy() : Promise<boolean> {
 async getSystemLocale() : Promise<string> {
     return await TAURI_INVOKE("get_system_locale");
 },
+async kill() : Promise<void> {
+    await TAURI_INVOKE("kill");
+},
 async isAbleToReadImageFile(filePath: string) : Promise<Result<boolean, null>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("is_able_to_read_image_file", { filePath }) };

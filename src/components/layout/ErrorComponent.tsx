@@ -1,3 +1,5 @@
+import { commands } from "@/bindings.gen";
+
 type ErrorComponentProps = {
   error: unknown;
 };
@@ -7,6 +9,10 @@ export default function ErrorComponent(props: ErrorComponentProps) {
 
   const onReloadClicked = () => {
     window.location.reload();
+  };
+
+  const onKillClicked = () => {
+    commands.kill();
   };
 
   return (
@@ -25,6 +31,12 @@ export default function ErrorComponent(props: ErrorComponentProps) {
         <a href="/recovery.html">
           リカバリページに移動する Navigate to recovery page
         </a>
+      </div>
+      <div>
+        それでも直らなかったら:
+        <button onClick={onKillClicked}>
+          アプリケーションを強制終了する(Abort this application forcibly)
+        </button>
       </div>
       <h2>エラー(Error)</h2>
       <pre>{`${error}`}</pre>
