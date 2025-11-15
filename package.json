@@ -22,7 +22,8 @@
     "format:backend": "cd src-tauri && cargo fmt",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "prepare": "husky && node scripts/prepare.js"
+    "prepare": "husky && node scripts/prepare.js",
+    "release": "npm run build && node scripts/bundle-zip.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
