@@ -128,7 +128,13 @@ function RouteComponent() {
           >
             Stop capture
           </Button>
-          <Button variant="secondary" onClick={onSendFullScreenClicked}>
+          <Button
+            css={css`
+              margin-left: 10px;
+            `}
+            variant="secondary"
+            onClick={onSendFullScreenClicked}
+          >
             Send full screen
           </Button>
         </div>
