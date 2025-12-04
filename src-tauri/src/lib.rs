@@ -60,7 +60,8 @@ pub fn run() {
             config::config_file_path,
             config::reset_config,
             launch_options::get_launch_options,
-        ]);
+        ])
+        .events(tauri_specta::collect_events![SendRequestEvent,]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
     generate_binding_file(&builder);
@@ -72,8 +73,10 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(builder.invoke_handler())
-        .setup(|app| {
+        .setup(move |app| {
             app.manage(app_data::AppData::new(app.handle().clone()));
+
+            builder.mount_events(&app.handle().clone());
 
             capture::init_capture_thread(app.handle().clone());
 
@@ -132,6 +135,19 @@ fn open_resource_dir(handle: tauri::AppHandle) -> Result<(), AppError> {
         ))?;
 
     Ok(())
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, specta::Type)]
+pub enum SendRequestEventMode {
+    UploadImageToVideoServer,
+    UploadImageToImageServer,
+    UploadImageToVRChatPrint,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, specta::Type, tauri_specta::Event)]
+pub struct SendRequestEvent {
+    file: String,
+    mode: Option<SendRequestEventMode>,
 }
 
 #[tauri::command]

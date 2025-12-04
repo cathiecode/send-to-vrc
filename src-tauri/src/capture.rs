@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use tauri::{AppHandle, Emitter as _, Manager as _};
+use tauri_specta::Event as _;
 use tokio::sync::broadcast::{Receiver, Sender};
 
 static CAPTURE_THREAD_REQUEST_SENDER: std::sync::OnceLock<Sender<CaptureThreadRequest>> =
@@ -219,12 +220,21 @@ struct Rect {
     y2: u32,
 }
 
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, specta::Type)]
+pub enum FinishCaptureNextAction {
+    Ask,
+    UploadImageToVideoServer,
+    UploadImageToImageServer,
+    UploadImageToVRChatPrint,
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn finish_capture_with_cropped_rect(
     app_handle: AppHandle,
     monitor_id: &str,
     rect: NormalizedRect,
+    next_action: FinishCaptureNextAction,
 ) -> Result<(), String> {
     info!("Finishing capture with cropped rect: {:?}", rect);
 
@@ -261,8 +271,24 @@ pub fn finish_capture_with_cropped_rect(
 
     stop_capture()?;
 
-    app_handle
-        .emit("send_request", result_path.to_string_lossy().to_string())
+    let send_request_event = crate::SendRequestEvent {
+        file: result_path.to_string_lossy().to_string(),
+        mode: match next_action {
+            FinishCaptureNextAction::Ask => None,
+            FinishCaptureNextAction::UploadImageToVideoServer => {
+                Some(crate::SendRequestEventMode::UploadImageToVideoServer)
+            }
+            FinishCaptureNextAction::UploadImageToImageServer => {
+                Some(crate::SendRequestEventMode::UploadImageToImageServer)
+            }
+            FinishCaptureNextAction::UploadImageToVRChatPrint => {
+                Some(crate::SendRequestEventMode::UploadImageToVRChatPrint)
+            }
+        },
+    };
+
+    send_request_event
+        .emit(&app_handle)
         .map_err(|e| format!("Failed to emit send_request event: {e}"))?;
 
     Ok(())

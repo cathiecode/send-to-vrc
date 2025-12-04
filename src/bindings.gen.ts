@@ -143,9 +143,9 @@ async stopCapture() : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async finishCaptureWithCroppedRect(monitorId: string, rect: NormalizedRect) : Promise<Result<null, string>> {
+async finishCaptureWithCroppedRect(monitorId: string, rect: NormalizedRect, nextAction: FinishCaptureNextAction) : Promise<Result<null, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("finish_capture_with_cropped_rect", { monitorId, rect }) };
+    return { status: "ok", data: await TAURI_INVOKE("finish_capture_with_cropped_rect", { monitorId, rect, nextAction }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -188,6 +188,11 @@ async getLaunchOptions() : Promise<Result<LaunchOptions, AppError>> {
 /** user-defined events **/
 
 
+export const events = __makeEvents__<{
+sendRequestEvent: SendRequestEvent
+}>({
+sendRequestEvent: "send-request-event"
+})
 
 /** user-defined constants **/
 
@@ -196,10 +201,13 @@ async getLaunchOptions() : Promise<Result<LaunchOptions, AppError>> {
 /** user-defined types **/
 
 export type AppError = { type: "ConfigContents"; message: string } | { type: "ConfigExistance"; message: string } | { type: "ConfigDirectoryExistance"; message: string } | { type: "UploaderAuthRequired"; message: string } | { type: "VrchatAuthRequired"; message: string } | { type: "VrchatPlusRequired"; message: string } | { type: "Unknown"; message: string }
+export type FinishCaptureNextAction = "Ask" | "UploadImageToVideoServer" | "UploadImageToImageServer" | "UploadImageToVRChatPrint"
 export type LaunchOptions = { mode: LaunchOptionsMode }
 export type LaunchOptionsMode = { type: "Default" } | { type: "Send"; args: { file: string } } | { type: "Capture" }
 export type LoginResult = { type: "Success" } | { type: "RequiresTwoFactorAuth"; content: TwoFactorMethod[] }
 export type NormalizedRect = { x1: number; y1: number; x2: number; y2: number }
+export type SendRequestEvent = { file: string; mode: SendRequestEventMode | null }
+export type SendRequestEventMode = "UploadImageToVideoServer" | "UploadImageToImageServer" | "UploadImageToVRChatPrint"
 export type Tos = { version: number; content: string }
 export type TwoFactorMethod = "Totp" | "EmailOtp" | { Unknown: string }
 

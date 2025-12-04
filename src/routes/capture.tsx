@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { TbMovie, TbPhotoUp, TbPrinter } from "react-icons/tb";
 import { usePopper } from "react-popper";
 import useSWR from "swr";
 import { css } from "@emotion/react";
@@ -11,13 +12,16 @@ import useBoundingSelectorState, {
 } from "@/hooks/useBoundingSelectorState";
 import useBoundingClientRect from "@/hooks/useClientBoundingBox";
 import convertFreshFileSrc from "@/features/file/convertFreshFileSrc";
-import { commands } from "@/bindings.gen";
+import { FinishCaptureNextAction, commands } from "@/bindings.gen";
+import { useLocalized } from "@/i18n";
 
 export const Route = createFileRoute("/capture")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const localized = useLocalized();
+
   const { data: webviewWidowLabel } = useSWR("webviewWindowLabel", async () => {
     return await getCurrentWebviewWindow().label;
   });
@@ -53,31 +57,34 @@ function RouteComponent() {
 
   const { styles: popperStyles } = usePopper(referenceElement, popperElement, {
     strategy: "fixed",
-    placement: "bottom-end",
+    placement: "right-end",
   });
 
-  const onSendClicked = useCallback(() => {
-    if (!webviewWidowLabel) {
-      return;
-    }
+  const onSendClicked = useCallback(
+    (nextAction: FinishCaptureNextAction) => {
+      if (!webviewWidowLabel) {
+        return;
+      }
 
-    const rootBoundingClientRect = boundingClientRect;
+      const rootBoundingClientRect = boundingClientRect;
 
-    if (!rootBoundingClientRect) {
-      return;
-    }
+      if (!rootBoundingClientRect) {
+        return;
+      }
 
-    const rect = {
-      x1: boundingRectInRootCssPixel.left / boundingClientRect.width,
-      y1: boundingRectInRootCssPixel.top / boundingClientRect.height,
-      x2: boundingRectInRootCssPixel.right / boundingClientRect.width,
-      y2: boundingRectInRootCssPixel.bottom / boundingClientRect.height,
-    };
+      const rect = {
+        x1: boundingRectInRootCssPixel.left / boundingClientRect.width,
+        y1: boundingRectInRootCssPixel.top / boundingClientRect.height,
+        x2: boundingRectInRootCssPixel.right / boundingClientRect.width,
+        y2: boundingRectInRootCssPixel.bottom / boundingClientRect.height,
+      };
 
-    commands
-      .finishCaptureWithCroppedRect(webviewWidowLabel, rect)
-      .catch(console.error);
-  }, [webviewWidowLabel, boundingClientRect, boundingRectInRootCssPixel]);
+      commands
+        .finishCaptureWithCroppedRect(webviewWidowLabel, rect, nextAction)
+        .catch(console.error);
+    },
+    [webviewWidowLabel, boundingClientRect, boundingRectInRootCssPixel],
+  );
 
   const onSendFullScreenClicked = useCallback(() => {
     if (!webviewWidowLabel) {
@@ -92,7 +99,7 @@ function RouteComponent() {
     };
 
     commands
-      .finishCaptureWithCroppedRect(webviewWidowLabel, rect)
+      .finishCaptureWithCroppedRect(webviewWidowLabel, rect, "Ask")
       .catch(console.error);
   }, [webviewWidowLabel]);
 
@@ -167,10 +174,21 @@ function RouteComponent() {
             ref={setPopperElement}
             style={popperStyles.popper}
             css={css`
+              display: flex;
+              flex-direction: column;
+              gap: 0.5em;
               padding: 1em;
             `}
           >
-            <Button onClick={onSendClicked}>Send to VRC</Button>
+            <Button onClick={() => onSendClicked("UploadImageToVideoServer")}>
+              <TbMovie /> {localized("send.send-to-video-player")}
+            </Button>
+            <Button onClick={() => onSendClicked("UploadImageToImageServer")}>
+              <TbPhotoUp /> {localized("send.send-to-image-viewer")}
+            </Button>
+            <Button onClick={() => onSendClicked("UploadImageToVRChatPrint")}>
+              <TbPrinter /> {localized("send.print-to-vrchat-print")}
+            </Button>
           </div>
         ) : null}
       </div>
