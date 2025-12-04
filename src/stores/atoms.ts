@@ -1,32 +1,14 @@
 import { atom } from "jotai";
-import { invoke } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { vrchatLoginTaskAtom } from "@/features/send-image/stores/vrchat-login";
 import router from "@/stores/router";
 import { commands } from "@/bindings.gen";
-import { parseArgs } from "./args";
 import {
   shouldCopyAfterUploadAtom,
   uploaderApiKeyAtom,
   uploaderUrlBaseAtom,
 } from "./config";
 import { createTaskAtom } from "./task";
-
-let cachedArgs: string[] | null = null;
-
-export const argsAtom = atom((_get) => {
-  if (cachedArgs) {
-    return cachedArgs;
-  }
-
-  return (async () => {
-    cachedArgs = (await invoke("get_args")) as string[];
-
-    return cachedArgs;
-  })();
-});
-
-export const optionsAtom = atom((get) => mapPromise(get(argsAtom), parseArgs));
 
 export type ImageViewerSendState =
   | {
@@ -88,14 +70,7 @@ const fileToSendBaseAtom = atom<
 
 export const fileToSendAtom = atom(
   (get) => {
-    return (
-      get(fileToSendBaseAtom) ??
-      mapPromise(get(optionsAtom), (opts) =>
-        opts.fileToSend !== undefined
-          ? { filePath: opts.fileToSend, requestedAt: 0 }
-          : undefined,
-      )
-    );
+    return get(fileToSendBaseAtom);
   },
   (_get, set, filePath: string) => {
     set(fileToSendBaseAtom, { filePath: filePath, requestedAt: Date.now() });
@@ -296,11 +271,3 @@ export const sendImageToVRChatPrintAtom = atom(
 );
 
 export const registerRequestAtom = createTaskAtom<void>();
-
-function mapPromise<T, U>(v: T | Promise<T>, map: (v: T) => U): U | Promise<U> {
-  if (v instanceof Promise) {
-    return v.then(map);
-  }
-
-  return map(v);
-}

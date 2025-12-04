@@ -6,9 +6,6 @@
 
 
 export const commands = {
-async getArgs() : Promise<string[]> {
-    return await TAURI_INVOKE("get_args");
-},
 async openResourceDir() : Promise<Result<null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("open_resource_dir") };
@@ -177,6 +174,14 @@ async resetConfig() : Promise<Result<null, AppError>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async getLaunchOptions() : Promise<Result<LaunchOptions, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_launch_options") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -191,6 +196,8 @@ async resetConfig() : Promise<Result<null, AppError>> {
 /** user-defined types **/
 
 export type AppError = { type: "ConfigContents"; message: string } | { type: "ConfigExistance"; message: string } | { type: "ConfigDirectoryExistance"; message: string } | { type: "UploaderAuthRequired"; message: string } | { type: "VrchatAuthRequired"; message: string } | { type: "VrchatPlusRequired"; message: string } | { type: "Unknown"; message: string }
+export type LaunchOptions = { mode: LaunchOptionsMode }
+export type LaunchOptionsMode = { type: "Default" } | { type: "Send"; args: { file: string } } | { type: "Capture" }
 export type LoginResult = { type: "Success" } | { type: "RequiresTwoFactorAuth"; content: TwoFactorMethod[] }
 export type NormalizedRect = { x1: number; y1: number; x2: number; y2: number }
 export type Tos = { version: number; content: string }

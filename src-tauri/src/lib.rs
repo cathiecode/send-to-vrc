@@ -11,6 +11,7 @@ mod file;
 mod image;
 mod image_to_image;
 mod image_to_video;
+mod launch_options;
 mod prelude;
 mod progress;
 mod uploader;
@@ -35,7 +36,6 @@ pub fn run() {
     let builder = tauri_specta::Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(tauri_specta::collect_commands![
-            get_args,
             open_resource_dir,
             read_config_value,
             write_config_value,
@@ -59,6 +59,7 @@ pub fn run() {
             capture::get_capture_url_command,
             config::config_file_path,
             config::reset_config,
+            launch_options::get_launch_options,
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
@@ -80,12 +81,6 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-#[tauri::command]
-#[specta::specta]
-fn get_args() -> Vec<String> {
-    std::env::args().collect()
 }
 
 #[tauri::command]
