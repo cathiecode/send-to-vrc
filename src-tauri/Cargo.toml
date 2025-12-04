@@ -1,6 +1,6 @@
 [package]
 name = "send-to-vrc"
-version = "1.3.6" # @appversion
+version = "1.4.0" # @appversion
 description = "An application for uploading images to see in VRChat."
 authors = ["cathiecode"]
 edition = "2021"
